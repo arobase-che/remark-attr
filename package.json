@@ -1,0 +1,24 @@
+{
+  "name": "remark-attr",
+  "version": "0.1.0",
+  "description": "Add support of custom attributes to Markdown syntax.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/arobase-che/remark-attr.git"
+  },
+  "keywords": [
+    "markdown",
+    "attribute",
+    "plugin"
+  ],
+  "author": "ache <ache@ache.one>",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/arobase-che/remark-attr/issues"
+  },
+  "homepage": "https://github.com/arobase-che/remark-attr#readme"
+}
