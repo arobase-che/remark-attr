@@ -58,18 +58,37 @@ const unified = require('unified')
 const remarkParse = require('remark-parse')
 const stringify = require('rehype-stringify')
 const remark2rehype = require('remark-rehype')
+const remarkAttr = require('remark-attr')
 
-const remarkAttr = require('remark-attr');
 ```
 
 ### Usage:
 
 ```javascript
+const testFile = `
+
+Here a test :
+
+![ache avatar](https://ache.one/res/ache.svg){ height=100 }
+
+`
+
 unified()
   .use(remarkParse)
   .use(remarkAttr)
   .use(remark2rehype)
   .use(stringify)
+  .process( testFile, (err, file) => {
+    console.log(String(file))
+  } )
+```
+
+Output :
+
+```shell
+$ node index.js
+<p>Here a test :</p>
+<p><img src="https://ache.one/res/ache.svg" alt="ache avatar" height="100"></p>
 ```
 
 
@@ -79,17 +98,9 @@ unified()
 
 <!-- GNUv3 or MIT -->
 
-[build-badge]: https://img.shields.io/travis/zestedesavoir/zmarkdown.svg
-
-[build-status]: https://travis-ci.org/zestedesavoir/zmarkdown
-
-[coverage-badge]: https://img.shields.io/coveralls/zestedesavoir/zmarkdown.svg
-
-[coverage-status]: https://coveralls.io/github/zestedesavoir/zmarkdown
-
 [zds]: https://zestedesavoir.com
 
-[npm]: https://www.npmjs.com/package/remark-ping
+[npm]: https://www.npmjs.com/package/remark-attr
 
 [mdast]: https://github.com/syntax-tree/mdast/blob/master/readme.md
 
