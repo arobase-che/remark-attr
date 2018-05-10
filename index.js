@@ -31,6 +31,21 @@ const convTypeTag = {
   'link': 'a',
   'header': 'h1',
 };
+/* TODO :
+ * - [ ] fencedCode     // require('./tokenize/code-fenced'),
+   - [ ] atxHeading     //require('./tokenize/heading-atx'),
+   - [ ] setextHeading	//require('./tokenize/heading-setext'),
+   - [ ] table          //require('./tokenize/table'),
+   - [x] link           //require('./tokenize/link'),
+   - [ ] strong         //require('./tokenize/strong'),
+   - [ ] emphasis       //require('./tokenize/emphasis'),
+   - [ ] deletion       //require('./tokenize/delete'),
+   - [ ] code           //require('./tokenize/code-inline'),
+   - [ ] break          //require('./tokenize/break'),
+
+  Tests with ava
+  xo as linter
+*/
 
 function filterAttributes( prop, config, type ) {
   const scope = config.scope;
@@ -63,17 +78,16 @@ function filterAttributes( prop, config, type ) {
   return prop;
 }
 
-module.exports = function linkAttr( config ) {
+module.exports = function linkAttr( config_user ) {
   let parser = this.Parser;
 
-  if( config === undefined ) {
-    config = {
+  const defaul_config = {
       allowDangerousDOMEventHandlers: false,
-      elements: ["links","images","headers"],
+      elements: ["link","image","header"],
       extends: [],
       scope: "specific",
-    };
-  }
+  };
+  const config = {...defaul_config, ...config_user};
 
   if (!isRemarkParser(parser)) {
     throw new Error('Missing parser to attach `remark-attr` [link] (to)');
