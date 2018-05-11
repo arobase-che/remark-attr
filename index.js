@@ -29,40 +29,83 @@ const DOMEventHandler = [
 const convTypeTag = {
   'image':'img',
   'link': 'a',
-  'header': 'h1',
+  'heading': 'h1',
+  'strong': 'strong',
+  'emphasis': 'em',
+  'delete': 's',
+  'inlineCode': 'code',
 };
 /* TODO :
  * - [ ] fencedCode     // require('./tokenize/code-fenced'),
-   - [ ] atxHeading     //require('./tokenize/heading-atx'),
+   - [x] atxHeading     //require('./tokenize/heading-atx'),
    - [ ] setextHeading	//require('./tokenize/heading-setext'),
    - [ ] table          //require('./tokenize/table'),
    - [x] link           //require('./tokenize/link'),
-   - [ ] strong         //require('./tokenize/strong'),
-   - [ ] emphasis       //require('./tokenize/emphasis'),
-   - [ ] deletion       //require('./tokenize/delete'),
-   - [ ] code           //require('./tokenize/code-inline'),
-   - [ ] break          //require('./tokenize/break'),
+   - [x] strong         //require('./tokenize/strong'),
+   - [x] emphasis       //require('./tokenize/emphasis'),
+   - [x] deletion       //require('./tokenize/delete'),
+   - [x] code           //require('./tokenize/code-inline'),
 
   Tests with ava
   xo as linter
 */
+
+const tokenizeGenerator = ( prefix, oldParser, config ) => function tokenize(eat, value, silent) {
+    let eaten = oldParser.bind(this)(eat,value,silent);
+
+    var self = this;
+    var index = 0;
+    var pedantic = self.options.pedantic;
+    var commonmark = self.options.commonmark;
+    var gfm = self.options.gfm;
+    var parsedAttr;
+    const length = value.length;
+
+    if( !eaten || !eaten.position ) {
+      return undefined;
+    }
+
+    const type = convTypeTag[eaten.type];
+
+    index = eaten.position.end.offset - eaten.position.start.offset;
+
+    if (index + prefix.length < length && value.charAt(index + prefix.length) === '{' ) {
+      parsedAttr = parseAttr(value, index + prefix.length);
+    }
+
+    if (parsedAttr) {
+      if( config.scope && config.scope != "none" ) {
+
+        const filtredProp  = filterAttributes( parsedAttr.prop, config, type );
+        if( filtredProp !== {} ) {
+          if( eaten.data ) {
+            eaten.data.hProperties = filtredProp;
+          } else {
+            eaten.data = {hProperties: filtredProp};
+          }
+        }
+      }
+      eaten = eat(prefix + parsedAttr.eaten)(eaten);
+    }
+    return eaten;
+  };
 
 function filterAttributes( prop, config, type ) {
   const scope = config.scope;
   const allowDangerousDOMEventHandlers = config.allowDangerousDOMEventHandlers;
 
   if( scope === "specific" ) {
+    console.log(type);
     Object.getOwnPropertyNames(prop).forEach ( p => {
-      if( htmlElemAttr[type].indexOf(p) < 0 &&
-          htmlElemAttr["*"].indexOf(p) < 0 &&
+      if( (!htmlElemAttr[type] || htmlElemAttr[type].indexOf(p) < 0) &&
+          htmlElemAttr["*"].indexOf(p) < 0 && 
           DOMEventHandler.indexOf(p) < 0 ) {
-        console.log(p);
         delete prop[p];
       }
     });
   } else if ( scope === "global" ) {
     Object.getOwnPropertyNames(prop).forEach ( p => {
-      if( htmlElemAttr["*"].indexOf(p) < 0 &&
+      if( htmlElemAttr["*"].indexOf(p) < 0 && 
           DOMEventHandler.indexOf(p) < 0 ) {
         delete prop[p];
       }
@@ -94,51 +137,36 @@ module.exports = function linkAttr( config_user ) {
   }
 
   let tokenizers = parser.prototype.inlineTokenizers;
+  let tokenizersBlock = parser.prototype.blockTokenizers ;
 
   const oldLink = tokenizers.link;
+  const oldStrong = tokenizers.strong;
+  const oldEmphasis = tokenizers.emphasis;
+  const oldDeletion = tokenizers.deletion;
+  const oldCodeInline = tokenizers.code;
+  const oldAtxHeader = tokenizersBlock.atxHeading;
 
+
+  let linkTokenize = tokenizeGenerator('', oldLink, config);
   linkTokenize.locator = tokenizers.link.locator;
+  let strongTokenize = tokenizeGenerator('', oldStrong, config);
+  strongTokenize.locator = tokenizers.strong.locator;
+  let emphasisTokenize = tokenizeGenerator('', oldEmphasis, config);
+  emphasisTokenize.locator = tokenizers.emphasis.locator;
+  let deleteTokenize = tokenizeGenerator('', oldDeletion, config);
+  deleteTokenize.locator = tokenizers.deletion.locator;
+  let codeInlineTokenize = tokenizeGenerator('', oldCodeInline, config);
+  codeInlineTokenize.locator = tokenizers.code.locator;
 
-  function linkTokenize(eat, value, silent) {
-    let linkEaten = oldLink.bind(this)(eat,value,silent);
 
-    var self = this;
-    var index = 0;
-    var pedantic = self.options.pedantic;
-    var commonmark = self.options.commonmark;
-    var gfm = self.options.gfm;
-    var parsedAttr;
-    const length = value.length;
 
-    if( !linkEaten || !linkEaten.position ) {
-      return undefined;
-    }
-
-    const type = convTypeTag[linkEaten.type];
-
-    index = linkEaten.position.end.offset - linkEaten.position.start.offset;
-
-    if (index < length && value.charAt(index) === '{' ) {
-      parsedAttr = parseAttr(value, index);
-    }
-
-    if (parsedAttr) {
-      if( config.scope && config.scope != "none" ) {
-
-        const filtredProp  = filterAttributes( parsedAttr.prop, config, type );
-        if( filtredProp !== {} ) {
-          if( linkEaten.data ) {
-            linkEaten.data.hProperties = filtredProp;
-          } else {
-            linkEaten.data = {hProperties: filtredProp};
-          }
-        }
-      }
-      linkEaten = eat(parsedAttr.eaten)(linkEaten);
-    }
-    return linkEaten;
-  }
+  tokenizersBlock.atxHeading = tokenizeGenerator( '\n', oldAtxHeader, config );
   tokenizers.link = linkTokenize;
+  tokenizers.strong   = strongTokenize;
+  tokenizers.emphasis = emphasisTokenize;
+  tokenizers.deletion = deleteTokenize;
+  tokenizers.code     = codeInlineTokenize;
+
 }
 
 function isRemarkParser(parser) {
