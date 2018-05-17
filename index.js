@@ -26,6 +26,8 @@ const DOMEventHandler = [
   'onsubmit', 'onsuspend', 'ontimeupdate',
   'ontoggle', 'onvolumechange', 'onwaiting',
 ];
+
+/* Table convertion between type and HTML tagName */
 const convTypeTag = {
   image: 'img',
   link: 'a',
@@ -35,11 +37,12 @@ const convTypeTag = {
   delete: 's',
   inlineCode: 'code',
 };
+
 /* TODO :
- * - [ ] fencedCode     // require('./tokenize/code-fenced'),
+ * - [~] fencedCode     // require('./tokenize/code-fenced'),
    - [x] atxHeading     //require('./tokenize/heading-atx'),
    - [ ] setextHeading	//require('./tokenize/heading-setext'),
-   - [ ] table          //require('./tokenize/table'),
+   - [~] table          //require('./tokenize/table'),
    - [x] link           //require('./tokenize/link'),
    - [x] strong         //require('./tokenize/strong'),
    - [x] emphasis       //require('./tokenize/emphasis'),
@@ -146,7 +149,6 @@ function remarkAttr(userConfig) {
   const oldCodeInline = tokenizers.code;
   const oldAtxHeader = tokenizersBlock.atxHeading;
 
-  console.log(tokenizeGenerator('', oldLink, config));
   const linkTokenize = tokenizeGenerator('', oldLink, config);
   linkTokenize.locator = tokenizers.link.locator;
   const strongTokenize = tokenizeGenerator('', oldStrong, config);
