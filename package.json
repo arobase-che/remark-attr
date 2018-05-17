@@ -16,7 +16,7 @@
     "plugin"
   ],
   "author": "ache <ache@ache.one>",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/arobase-che/remark-attr/issues"
   },
