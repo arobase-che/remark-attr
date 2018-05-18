@@ -112,11 +112,15 @@ function filterAttributes(prop, config, type) {
   let inScope = _ => false;
 
   switch (scope) {
-    case 'none':
+    case 'none': // Plugin is disabled
       break;
     case 'permissive':
     case 'every':
-      inScope = _ => true;
+      if (allowDangerousDOMEventHandlers) {
+        inScope = _ => true;
+      } else {
+        inScope = x => !isDangerous(x);
+      }
       break;
     case 'extented':
       inScope = p => extend[type].indexOf(p) >= 0;
@@ -127,10 +131,12 @@ function filterAttributes(prop, config, type) {
     case 'global':
     default:
       inScope = p => (inScope(p) || htmlElemAttr['*'].indexOf(p) >= 0);
+      if (allowDangerousDOMEventHandlers) { // If allowed add dangerous attributes to global scope
+        inScope = p => (inScope(p) || isDangerous(p));
+      }
   }
 
-  /* If the attribut is dangerous and not allowed and not explicitly allowed or not in the scope, delete it */
-  const filterFunction = x => (isDangerous(x) && !allowDangerousDOMEventHandlers && !inScope(x)) || !inScope;
+  const filterFunction = x => !inScope(x);
 
   Object.getOwnPropertyNames(prop).forEach(p => {
     if (filterFunction(p)) {
