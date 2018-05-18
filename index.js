@@ -147,6 +147,8 @@ function filterAttributes(prop, config, type) {
   return prop;
 }
 
+remarkAttr.SUPPORTED_ELEMENTS = supportedElements;
+
 module.exports = remarkAttr;
 
 function remarkAttr(userConfig) {
