@@ -3,8 +3,8 @@
 const parseAttr = require('md-attr-parser');
 const htmlElemAttr = require('html-element-attributes');
 
-const supportedElements = ['link', 'atxHeading', 'strong', 'emphasis', 'deletion', 'code'];
-const blockElements = ['atxHeading'];
+const supportedElements = ['link', 'atxHeading', 'strong', 'emphasis', 'deletion', 'code', 'setextHeading'];
+const blockElements = ['atxHeading', 'setextHeading'];
 
 const DOMEventHandler = [
   'onabort', 'onautocomplete', 'onautocompleteerror',
@@ -165,7 +165,7 @@ function remarkAttr(userConfig) {
     if (supportedElements.indexOf(elem) >= 0) {
       if (blockElements.indexOf(elem) >= 0) {
         const oldElem = tokenizersBlock[elem];
-        tokenizersBlock.atxHeading = tokenizeGenerator('\n', oldElem, config);
+        tokenizersBlock[elem] = tokenizeGenerator('\n', oldElem, config);
       } else {
         const oldElem = tokenizers[elem];
         const elemTokenize = tokenizeGenerator('', oldElem, config);
