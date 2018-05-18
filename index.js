@@ -3,6 +3,9 @@
 const parseAttr = require('md-attr-parser');
 const htmlElemAttr = require('html-element-attributes');
 
+const supportedElements = ['link', 'atxHeading', 'strong', 'emphasis', 'deletion', 'code'];
+const blockElements = ['atxHeading'];
+
 const DOMEventHandler = [
   'onabort', 'onautocomplete', 'onautocompleteerror',
   'onblur', 'oncancel', 'oncanplay',
@@ -51,6 +54,7 @@ const convTypeTag = {
 
   Tests with ava
   xo as linter
+  comment more
 */
 
 function tokenizeGenerator(prefix, oldParser, config) {
@@ -94,31 +98,46 @@ function tokenizeGenerator(prefix, oldParser, config) {
 
 function filterAttributes(prop, config, type) {
   const {scope} = config;
+  const {extend} = config;
   const {allowDangerousDOMEventHandlers} = config;
+  const specific = htmlElemAttr;
 
-  if (scope === 'specific') {
-    Object.getOwnPropertyNames(prop).forEach(p => {
-      if ((!htmlElemAttr[type] || htmlElemAttr[type].indexOf(p) < 0) &&
-          htmlElemAttr['*'].indexOf(p) < 0 &&
-          DOMEventHandler.indexOf(p) < 0) {
-        delete prop[p];
-      }
-    });
-  } else if (scope === 'global') {
-    Object.getOwnPropertyNames(prop).forEach(p => {
-      if (htmlElemAttr['*'].indexOf(p) < 0 &&
-          DOMEventHandler.indexOf(p) < 0) {
-        delete prop[p];
-      }
-    });
+  Object.getOwnPropertyNames(prop).forEach(p => {
+    if (p !== 'key' && p !== 'class' && p !== 'id') {
+      prop[p] = prop[p] || '';
+    }
+  });
+
+  const isDangerous = p => DOMEventHandler.indexOf(p) >= 0;
+  let inScope = _ => false;
+
+  switch (scope) {
+    case 'none':
+      break;
+    case 'permissive':
+    case 'every':
+      inScope = _ => true;
+      break;
+    case 'extented':
+      inScope = p => extend[type].indexOf(p) >= 0;
+      // Or if it in the specific scope, fallthrough
+    case 'specific':
+      inScope = p => (inScope(p) || specific[type].indexOf(p) >= 0);
+      // Or if it in the global scope fallthrough
+    case 'global':
+    default:
+      inScope = p => (inScope(p) || htmlElemAttr['*'].indexOf(p) >= 0);
   }
-  if (!allowDangerousDOMEventHandlers) {
-    Object.getOwnPropertyNames(prop).forEach(p => {
-      if (DOMEventHandler.indexOf(p) >= 0) {
-        delete prop[p];
-      }
-    });
-  }
+
+  /* If the attribut is dangerous and not allowed and not explicitly allowed or not in the scope, delete it */
+  const filterFunction = x => (isDangerous(x) && !allowDangerousDOMEventHandlers && !inScope(x)) || !inScope;
+
+  Object.getOwnPropertyNames(prop).forEach(p => {
+    if (filterFunction(p)) {
+      delete prop[p];
+    }
+  });
+
   return prop;
 }
 
@@ -127,13 +146,13 @@ module.exports = remarkAttr;
 function remarkAttr(userConfig) {
   const parser = this.Parser;
 
-  const defaulConfig = {
+  const defaultConfig = {
     allowDangerousDOMEventHandlers: false,
-    elements: ['link', 'image', 'header'],
-    extends: [],
+    elements: supportedElements,
+    extend: {},
     scope: 'specific',
   };
-  const config = {...defaulConfig, ...userConfig};
+  const config = {...defaultConfig, ...userConfig};
 
   if (!isRemarkParser(parser)) {
     throw new Error('Missing parser to attach `remark-attr` [link] (to)');
@@ -142,30 +161,19 @@ function remarkAttr(userConfig) {
   const tokenizers = parser.prototype.inlineTokenizers;
   const tokenizersBlock = parser.prototype.blockTokenizers;
 
-  const oldLink = tokenizers.link;
-  const oldStrong = tokenizers.strong;
-  const oldEmphasis = tokenizers.emphasis;
-  const oldDeletion = tokenizers.deletion;
-  const oldCodeInline = tokenizers.code;
-  const oldAtxHeader = tokenizersBlock.atxHeading;
-
-  const linkTokenize = tokenizeGenerator('', oldLink, config);
-  linkTokenize.locator = tokenizers.link.locator;
-  const strongTokenize = tokenizeGenerator('', oldStrong, config);
-  strongTokenize.locator = tokenizers.strong.locator;
-  const emphasisTokenize = tokenizeGenerator('', oldEmphasis, config);
-  emphasisTokenize.locator = tokenizers.emphasis.locator;
-  const deleteTokenize = tokenizeGenerator('', oldDeletion, config);
-  deleteTokenize.locator = tokenizers.deletion.locator;
-  const codeInlineTokenize = tokenizeGenerator('', oldCodeInline, config);
-  codeInlineTokenize.locator = tokenizers.code.locator;
-
-  tokenizersBlock.atxHeading = tokenizeGenerator('\n', oldAtxHeader, config);
-  tokenizers.link = linkTokenize;
-  tokenizers.strong = strongTokenize;
-  tokenizers.emphasis = emphasisTokenize;
-  tokenizers.deletion = deleteTokenize;
-  tokenizers.code = codeInlineTokenize;
+  config.elements.forEach(elem => {
+    if (supportedElements.indexOf(elem) >= 0) {
+      if (blockElements.indexOf(elem) >= 0) {
+        const oldElem = tokenizersBlock[elem];
+        tokenizersBlock.atxHeading = tokenizeGenerator('\n', oldElem, config);
+      } else {
+        const oldElem = tokenizers[elem];
+        const elemTokenize = tokenizeGenerator('', oldElem, config);
+        elemTokenize.locator = tokenizers[elem].locator;
+        tokenizers[elem] = elemTokenize;
+      }
+    }
+  });
 }
 
 function isRemarkParser(parser) {
