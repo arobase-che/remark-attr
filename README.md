@@ -67,9 +67,7 @@ gives:
 npm install remark-attr
 ```
 
-## Usage
-
-### Dependencies:
+## Dependencies:
 
 ```javascript
 const unified = require('unified')
@@ -80,7 +78,7 @@ const remarkAttr = require('remark-attr')
 
 ```
 
-### Usage:
+## Usage:
 
 ```javascript
 const testFile = `
@@ -109,58 +107,54 @@ $ node index.js
 <p><img src="https://ache.one/res/ache.svg" alt="ache avatar" height="100"></p>
 ```
 
-This package can be configurated. 
+## API
 
-```javascript
-unified()
-  .use(remarkParse)
-  .use(remarkAttr, config)
-  .use(remark2rehype)
-  .use(stringify)
-  .process( testFile, (err, file) => {
-    console.log(String(file))
-  } )
-```
+### `remarkAttr([options])`
 
-Here are the defaults options :
+Parse attributes of markdown elements.
 
-```javascript
-  {
-    allowDangerousDOMEventHandlers: false,
-    elements: ['link', 'image', 'header'],
-    extends: {},
-    scope: 'specific', 
-  };
-```
+#### `remarkAttr.SUPPORTED_ELEMENTS`
 
-**allowDangerousDOMEventHandlers** : A boolean
+The list of currently supported elements.
 
-Allow the use of `on-*` attributs. They are depreciated and disabled by default for security reason.
+`['link', 'atxHeading', 'strong', 'emphasis', 'deletion', 'code', 'setextHeading']`
 
-**elements** : A list of elements from this list `[ 'link', 'image', 'header', 'strong', 'emphasis', 'deletion', 'code', 'atxHeader' ]` or `"*"`.
+##### Options
 
-List of every tags on witch remark-attr will be activated or `'*'` to activate remark-attr on every supported tags.
+###### `options.allowDangerousDOMEventHandlers`
 
-**extends** : An object that extends the list of attributs supported for some elements.
+Whether to allow the use of `on-*` attributs. They are depreciated and disabled by default for security reason. Its a boolean (default: `false`).
+If allowed, DOM event handlers will be added to the global scope.
+
+###### `options.elements`
+
+The list of elements witch the attributes should be parsed. It's a list of string, a sublist of `SUPPORTED_ELEMENTS`.
+
+###### `options.extend`
+
+An object that extends the list of attributs supported for some elements.
 
 Example : 
+
 ```
-{extends: {image: ['original', 'quality', 'format', 'exposition']}}
+extend: {atxHeading: ['original', 'quality', 'format', 'toc']}
 ```
 
-With this configuration, if the scope permit it, 4 mores attributs will be supported for image elements.
+With this configuration, if the scope permit it, 4 mores attributs will be supported for atxHeading elements.
 
-**scope** : A string with the value `"global"` or `"specific"` or `"extented"` or `"none"` or `"every"`.
+###### `options.scope`
 
-`"none"` will disable the plugin
-`"global"` will activate only the global attributs
-`"specific"` will activate global and specific attributs.
-`"extented"` will add personalized tags for some elements.
-`"permissive"` or `"every"` will allow every attributs (execpt dangerous one) on every elements supported.
+A string with the value `"global"` or `"specific"` or `"extented"` or `"none"` or `"every"`.
+
+ - `"none"` will disable the plugin.
+ - `"global"` will activate only the global attributs.
+ - `"specific"` will activate global and specific attributs.
+ - `"extented"` will add personalized tags for some elements.
+ - `"permissive"` or `"every"` will allow every attributs (execept dangerous one) on every elements supported.
 
 ## License
 
-<!-- MIT -->
+Distributed under a MIT-like license.
 
 [npm]: https://www.npmjs.com/package/remark-attr
 
