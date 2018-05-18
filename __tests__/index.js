@@ -1,5 +1,6 @@
+import {readFileSync as file} from 'fs';
+import {join} from 'path';
 import unified from 'unified';
-
 import test from 'ava';
 import raw from 'rehype-raw';
 import reParse from 'remark-parse';
@@ -14,14 +15,14 @@ const Stream = stream.Readable;
 
 const render = text => unified()
   .use(reParse)
-  .use(plugin)
+  .use(plugin, {allowDangerousDOMEventHandlers: false, scope: 'permissive'})
   .use(remark2rehype)
   .use(stringify)
   .processSync(text);
 
 const renderRaw = text => unified()
   .use(reParse)
-  .use(plugin)
+  .use(plugin, {allowDangerousDOMEventHandlers: true, scope: 'permissive'})
   .use(remark2rehype, {allowDangerousHTML: true})
   .use(raw)
   .use(stringify)
@@ -93,6 +94,41 @@ test('em', async t => {
   parser.on('startTag', (name, attrs) => {
     if (name === 'strong') {
       t.true(propEgal({style: '4em'}, attrs));
+    }
+  });
+
+  await string2stream(contents).pipe(parser);
+});
+
+test('readme', async t => {
+  const fileExample = file(join(__dirname, 'readMeTest.txt'));
+  const {contents} = render(fileExample);
+  const parser = new parse5.SAXParser();
+
+  parser.on('startTag', (name, attrs) => {
+    switch (name) {
+      case 'img':
+        t.true(propEgal({height: 50, alt: 'alt', src: 'img'}, attrs));
+        break;
+      case 'a':
+        t.true(propEgal({ref: 'external', src: 'https://rms.sexy'}, attrs));
+        break;
+      case 'h3':
+        t.true(propEgal({style: 'color:red;'}, attrs));
+        break;
+      case 'em':
+        t.true(propEgal({style: 'color:yellow;'}, attrs));
+        break;
+      case 'strong':
+        t.true(propEgal({awesome: ''}, attrs));
+        break;
+      case 'del':
+        t.true(propEgal({style: 'color: grey;'}, attrs));
+        break;
+      case 'code':
+        t.true(propEgal({lang: 'c'}, attrs));
+        break;
+      default:
     }
   });
 
