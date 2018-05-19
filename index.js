@@ -42,21 +42,22 @@ const convTypeTag = {
   '*': '*',
 };
 
-/* TODO :
+/*
+ * TODO :
  * - [~] fencedCode     // require('./tokenize/code-fenced'),
-   - [x] atxHeading     //require('./tokenize/heading-atx'),
-   - [ ] setextHeading	//require('./tokenize/heading-setext'),
-   - [~] table          //require('./tokenize/table'),
-   - [x] link           //require('./tokenize/link'),
-   - [x] strong         //require('./tokenize/strong'),
-   - [x] emphasis       //require('./tokenize/emphasis'),
-   - [x] deletion       //require('./tokenize/delete'),
-   - [x] code           //require('./tokenize/code-inline'),
-
-  Tests with ava
-  xo as linter
-  comment more
-*/
+ * - [x] atxHeading     //require('./tokenize/heading-atx'),
+ * - [x] setextHeading	//require('./tokenize/heading-setext'),
+ * - [~] table          //require('./tokenize/table'),
+ * - [x] link           //require('./tokenize/link'),
+ * - [x] strong         //require('./tokenize/strong'),
+ * - [x] emphasis       //require('./tokenize/emphasis'),
+ * - [x] deletion       //require('./tokenize/delete'),
+ * - [x] code           //require('./tokenize/code-inline'),
+ *
+ * Tests with ava
+ * xo as linter
+ * comment more
+ */
 
 function tokenizeGenerator(prefix, oldParser, config) {
   function token(eat, value, silent) {
