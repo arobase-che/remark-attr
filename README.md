@@ -24,6 +24,13 @@ Header (Atx) :
 ### This is a title
 {style="color:red;"}
 ```
+Header :
+```markdown
+This is a title
+---------------
+{style="color: pink;"}
+```
+
 
 Emphasis :
 ```markdown
