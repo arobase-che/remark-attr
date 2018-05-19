@@ -13,6 +13,13 @@ import plugin from '..';
 
 const Stream = stream.Readable;
 
+const renderDefault = text => unified()
+  .use(reParse)
+  .use(plugin)
+  .use(remark2rehype)
+  .use(stringify)
+  .processSync(text);
+
 const render = text => unified()
   .use(reParse)
   .use(plugin, {allowDangerousDOMEventHandlers: false, scope: 'permissive'})
@@ -22,13 +29,20 @@ const render = text => unified()
 
 const renderRaw = text => unified()
   .use(reParse)
-  .use(plugin, {allowDangerousDOMEventHandlers: true, scope: 'permissive'})
+  .use(plugin, {allowDangerousDOMEventHandlers: false, scope: 'permissive'})
   .use(remark2rehype, {allowDangerousHTML: true})
   .use(raw)
   .use(stringify)
   .processSync(text);
 
-const mainTestString = `Inline *test*{style="em:4"} paragraphe. Use **multiple**{ style="color:pink"} inline ~~block~~ tag. Line \`tagCode\`{ style="color:yellow"}.`;
+/*
+ * TODO :
+ *  - Invalid scope
+ *  - Invalid extended
+ *  - aria attributes
+ */
+
+const mainTestString = `Inline *test*{style="em:4"} paragraph. Use **multiple**{ style="color:pink"} inline ~~block~~ tag. Line \`tagCode\`{ style="color:yellow"}.`;
 
 function string2stream(string) {
   const stream = new Stream();
@@ -59,6 +73,20 @@ function every(obj, fct) {
   return true;
 }
 
+test('basic-default', t => {
+  const {contents} = renderDefault(mainTestString);
+  const parser = new parse5.SAXParser();
+
+  const nbTag = {em: 1, s: 1, code: 1, strong: 1, errorTag: 0};
+  parser.on('startTag', name => {
+    if (name in nbTag) {
+      nbTag[name] -= 1;
+    }
+  });
+  string2stream(contents).pipe(parser);
+  t.true(every(nbTag, x => x === 0));
+});
+
 test('basic', t => {
   const {contents} = render(mainTestString);
   const parser = new parse5.SAXParser();
@@ -88,12 +116,47 @@ test('basic-raw', t => {
 });
 
 test('em', async t => {
-  const {contents} = render('textexampleno interest **Important**{style=4em} still no interest');
+  const {contents} = render('textexamplenointerest **Important**{style=4em} still no interest');
   const parser = new parse5.SAXParser();
 
   parser.on('startTag', (name, attrs) => {
     if (name === 'strong') {
       t.true(propEgal({style: '4em'}, attrs));
+    }
+  });
+
+  await string2stream(contents).pipe(parser);
+});
+
+test('readme-default', async t => {
+  const fileExample = file(join(__dirname, 'readMeTest.txt'));
+  const {contents} = renderDefault(fileExample);
+  const parser = new parse5.SAXParser();
+
+  parser.on('startTag', (name, attrs) => {
+    switch (name) {
+      case 'img':
+        t.true(propEgal({height: 50, alt: 'alt', src: 'img'}, attrs));
+        break;
+      case 'a':
+        t.true(propEgal({ref: 'external', src: 'https://rms.sexy'}, attrs));
+        break;
+      case 'h3':
+        t.true(propEgal({style: 'color:red;'}, attrs));
+        break;
+      case 'em':
+        t.true(propEgal({style: 'color:yellow;'}, attrs));
+        break;
+      case 'strong':
+        t.true(propEgal({}, attrs));
+        break;
+      case 'del':
+        t.true(propEgal({style: 'color: grey;'}, attrs));
+        break;
+      case 'code':
+        t.true(propEgal({}, attrs));
+        break;
+      default:
     }
   });
 
@@ -123,7 +186,7 @@ test('readme', async t => {
         t.true(propEgal({awesome: ''}, attrs));
         break;
       case 'del':
-        t.true(propEgal({style: 'color: grey;'}, attrs));
+        t.true(propEgal({style: 'color: gray;'}, attrs));
         break;
       case 'code':
         t.true(propEgal({lang: 'c'}, attrs));
@@ -133,5 +196,79 @@ test('readme', async t => {
   });
 
   await string2stream(contents).pipe(parser);
+});
+
+test('extended', async t => {
+  const renderExtended = text => unified()
+    .use(reParse)
+    .use(plugin, {extend: {image: ['quality']}})
+    .use(remark2rehype)
+    .use(stringify)
+    .process(text, (err, file) => {
+      const parser = new parse5.SAXParser();
+
+      t.true(!err);
+
+      parser.on('startTag', (name, attrs) => {
+        if (name === 'img') {
+          t.true(propEgal({alt: 'Awesome image', src: 'aws://image.jpg', quality: '80'}, attrs));
+        }
+      });
+      string2stream(String(file)).pipe(parser);
+    });
+
+  await renderExtended(`
+*Wait* !
+This is an awesome image : ![Awesome image](aws://image.jpg){ quality="80" awesomeness="max" }
+`);
+});
+
+test('extended Dangerous', async t => {
+  const renderExtended = text => unified()
+    .use(reParse)
+    .use(plugin, {extend: {image: ['quality', 'onload']}})
+    .use(remark2rehype)
+    .use(stringify)
+    .process(text, (err, file) => {
+      const parser = new parse5.SAXParser();
+
+      t.true(!err);
+
+      parser.on('startTag', (name, attrs) => {
+        if (name === 'img') {
+          t.true(propEgal({alt: 'Awesome image', src: 'aws://image.jpg', quality: '80', onload: 'launchAwesomeFunction();'}, attrs));
+        }
+      });
+      string2stream(String(file)).pipe(parser);
+    });
+
+  await renderExtended(`
+*Wait* !
+This is an awesome image : ![Awesome image](aws://image.jpg){ quality="80" awesomeness="max" onload="launchAwesomeFunction();" }
+`);
+});
+
+test('extended-global', async t => {
+  const renderExtended = text => unified()
+    .use(reParse)
+    .use(plugin, {extend: {'*': ['exAttr']}})
+    .use(remark2rehype)
+    .use(stringify)
+    .process(text, (err, file) => {
+      const parser = new parse5.SAXParser();
+
+      t.true(!err);
+
+      parser.on('startTag', (name, attrs) => {
+        if (name === 'strong') {
+          t.true(propEgal({exAttr: 'true'}, attrs));
+        }
+      });
+      string2stream(String(file)).pipe(parser);
+    });
+
+  await renderExtended(`
+*Wait* ! You are **beautiful**{ exAttr="true" } !
+`);
 });
 

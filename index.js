@@ -39,6 +39,7 @@ const convTypeTag = {
   emphasis: 'em',
   delete: 's',
   inlineCode: 'code',
+  '*': '*',
 };
 
 /* TODO :
@@ -102,6 +103,14 @@ function filterAttributes(prop, config, type) {
   const {allowDangerousDOMEventHandlers} = config;
   const specific = htmlElemAttr;
 
+  const extendTag = (extend => {
+    const t = {};
+    Object.getOwnPropertyNames(extend).forEach(p => {
+      t[convTypeTag[p]] = extend[p];
+    });
+    return t;
+  })(extend);
+
   Object.getOwnPropertyNames(prop).forEach(p => {
     if (p !== 'key' && p !== 'class' && p !== 'id') {
       prop[p] = prop[p] || '';
@@ -109,7 +118,7 @@ function filterAttributes(prop, config, type) {
   });
 
   const isDangerous = p => DOMEventHandler.indexOf(p) >= 0;
-  const isSpecific = p => 'type' in specific && specific[type].indexOf(p) >= 0;
+  const isSpecific = p => type in specific && specific[type].indexOf(p) >= 0;
   const isGlobal = p => htmlElemAttr['*'].indexOf(p) >= 0;
 
   let inScope = _ => false;
@@ -127,8 +136,9 @@ function filterAttributes(prop, config, type) {
         inScope = x => !isDangerous(x);
       }
       break;
-    case 'extented':
-      inScope = p => extend[type].indexOf(p) >= 0;
+    case 'extended':
+      inScope = p => extendTag && type in extendTag && extendTag[type].indexOf(p) >= 0;
+      inScope = orFunc(inScope, p => '*' in extendTag && extendTag['*'].indexOf(p) >= 0);
       // Or if it in the specific scope, fallthrough
     case 'specific':
       inScope = orFunc(inScope, isSpecific);
@@ -141,10 +151,8 @@ function filterAttributes(prop, config, type) {
       }
   }
 
-  const filterFunction = x => !inScope(x);
-
   Object.getOwnPropertyNames(prop).forEach(p => {
-    if (filterFunction(p)) {
+    if (!inScope(p)) {
       delete prop[p];
     }
   });
@@ -163,7 +171,7 @@ function remarkAttr(userConfig) {
     allowDangerousDOMEventHandlers: false,
     elements: supportedElements,
     extend: {},
-    scope: 'specific',
+    scope: 'extended',
   };
   const config = {...defaultConfig, ...userConfig};
 
