@@ -109,7 +109,12 @@ function filterAttributes(prop, config, type) {
   });
 
   const isDangerous = p => DOMEventHandler.indexOf(p) >= 0;
+  const isSpecific = p => 'type' in specific && specific[type].indexOf(p) >= 0;
+  const isGlobal = p => htmlElemAttr['*'].indexOf(p) >= 0;
+
   let inScope = _ => false;
+
+  const orFunc = (fun, fun2) => x => fun(x) || fun2(x);
 
   switch (scope) {
     case 'none': // Plugin is disabled
@@ -126,13 +131,13 @@ function filterAttributes(prop, config, type) {
       inScope = p => extend[type].indexOf(p) >= 0;
       // Or if it in the specific scope, fallthrough
     case 'specific':
-      inScope = p => (inScope(p) || specific[type].indexOf(p) >= 0);
+      inScope = orFunc(inScope, isSpecific);
       // Or if it in the global scope fallthrough
     case 'global':
     default:
-      inScope = p => (inScope(p) || htmlElemAttr['*'].indexOf(p) >= 0);
+      inScope = orFunc(inScope, isGlobal);
       if (allowDangerousDOMEventHandlers) { // If allowed add dangerous attributes to global scope
-        inScope = p => (inScope(p) || isDangerous(p));
+        inScope = orFunc(inScope, isDangerous);
       }
   }
 
