@@ -49,7 +49,7 @@ Your problem is ~~at line 18~~{style="color: grey"}. My mistake, it's at line 14
 
 Code    :
 ```markdown
-You can use the `fprintf`{lang=c} function to format the output to a file.
+You can use the `fprintf`{language=c} function to format the output to a file.
 ```
 
 ## rehype
@@ -130,16 +130,16 @@ The list of currently supported elements.
 
 ###### `options.allowDangerousDOMEventHandlers`
 
-Whether to allow the use of `on-*` attributs. They are depreciated and disabled by default for security reason. Its a boolean (default: `false`).
+Whether to allow the use of `on-*` attributes. They are depreciated and disabled by default for security reason. Its a boolean (default: `false`).
 If allowed, DOM event handlers will be added to the global scope.
 
 ###### `options.elements`
 
-The list of elements witch the attributes should be parsed. It's a list of string, a sublist of `SUPPORTED_ELEMENTS`.
+The list of elements witch the attributes should be parsed. It's a list of string, a sub-list of `SUPPORTED_ELEMENTS`.
 
 ###### `options.extend`
 
-An object that extends the list of attributs supported for some elements.
+An object that extends the list of attributes supported for some elements.
 
 Example : 
 
@@ -147,17 +147,17 @@ Example :
 extend: {atxHeading: ['original', 'quality', 'format', 'toc']}
 ```
 
-With this configuration, if the scope permit it, 4 mores attributs will be supported for atxHeading elements.
+With this configuration, if the scope permit it, 4 mores attributes will be supported for atxHeading elements.
 
 ###### `options.scope`
 
 A string with the value `"global"` or `"specific"` or `"extented"` or `"none"` or `"every"`.
 
  - `"none"` will disable the plugin.
- - `"global"` will activate only the global attributs.
- - `"specific"` will activate global and specific attributs.
- - `"extented"` will add personalized tags for some elements.
- - `"permissive"` or `"every"` will allow every attributs (execept dangerous one) on every elements supported.
+ - `"global"` will activate only the global attributes.
+ - `"specific"` will activate global and specific attributes.
+ - `"extended"` will add personalized tags for some elements.
+ - `"permissive"` or `"every"` will allow every attributes (except dangerous one) on every elements supported.
 
 ## License
 
