@@ -6,6 +6,7 @@ const htmlElemAttr = require('html-element-attributes');
 const supportedElements = ['link', 'atxHeading', 'strong', 'emphasis', 'deletion', 'code', 'setextHeading'];
 const blockElements = ['atxHeading', 'setextHeading'];
 
+// The list of DOM Event handler
 const DOMEventHandler = [
   'onabort', 'onautocomplete', 'onautocompleteerror',
   'onblur', 'oncancel', 'oncanplay',
@@ -42,25 +43,28 @@ const convTypeTag = {
   '*': '*',
 };
 
-/*
- * TODO :
- * - [~] fencedCode     // require('./tokenize/code-fenced'),
- * - [x] atxHeading     //require('./tokenize/heading-atx'),
- * - [x] setextHeading	//require('./tokenize/heading-setext'),
- * - [~] table          //require('./tokenize/table'),
- * - [x] link           //require('./tokenize/link'),
- * - [x] strong         //require('./tokenize/strong'),
- * - [x] emphasis       //require('./tokenize/emphasis'),
- * - [x] deletion       //require('./tokenize/delete'),
- * - [x] code           //require('./tokenize/code-inline'),
+/* This function is a generic function that transform
+ * the tokenize function a node type to a version that understand
+ * attributes.
  *
- * Tests with ava
- * xo as linter
- * comment more
+ * The tokenizer function of strong will tokenize **STRONG STRING**
+ * this function extand it to tokenize **STRONG STRING**{list=of attributes}
+ *
+ * - The prefix is '\n' for block node and '' for inline one
+ *
+ * The syntax is for atxHeading ::
+ * ## HEAD TITLE
+ * {attributes}
+ *
+ * Attributes are on the next line.
+ *
+ * - The old parser is the old function user to tokenize
+ * - The config is the configuration of this plugin
+ *
  */
-
 function tokenizeGenerator(prefix, oldParser, config) {
   function token(eat, value, silent) {
+    // This we call the old tokenize
     const self = this;
     let eaten = oldParser.call(self, eat, value, silent);
 
@@ -76,10 +80,13 @@ function tokenizeGenerator(prefix, oldParser, config) {
 
     index = eaten.position.end.offset - eaten.position.start.offset;
 
+    // Then we check for attributes
     if (index + prefix.length < length && value.charAt(index + prefix.length) === '{') {
+    // If any, parse it
       parsedAttr = parseAttr(value, index + prefix.length);
     }
 
+    // If parsed configure the node
     if (parsedAttr) {
       if (config.scope && config.scope !== 'none') {
         const filtredProp = filterAttributes(parsedAttr.prop, config, type);
@@ -93,11 +100,14 @@ function tokenizeGenerator(prefix, oldParser, config) {
       }
       eaten = eat(prefix + parsedAttr.eaten)(eaten);
     }
+
     return eaten;
   }
+  // Return the new tokenizer function
   return token;
 }
 
+// A generic function to parse attributes
 function filterAttributes(prop, config, type) {
   const {scope} = config;
   const {extend} = config;
@@ -112,6 +122,7 @@ function filterAttributes(prop, config, type) {
     return t;
   })(extend);
 
+  // Delete empty key/class/id attributes
   Object.getOwnPropertyNames(prop).forEach(p => {
     if (p !== 'key' && p !== 'class' && p !== 'id') {
       prop[p] = prop[p] || '';
@@ -124,8 +135,10 @@ function filterAttributes(prop, config, type) {
 
   let inScope = _ => false;
 
+  // Function used to `or combine` two other function.
   const orFunc = (fun, fun2) => x => fun(x) || fun2(x);
 
+  // Respect the scope configuration
   switch (scope) {
     case 'none': // Plugin is disabled
       break;
@@ -152,6 +165,7 @@ function filterAttributes(prop, config, type) {
       }
   }
 
+  // If an attributes isn't in the scope, delete it
   Object.getOwnPropertyNames(prop).forEach(p => {
     if (!inScope(p)) {
       delete prop[p];
@@ -165,6 +179,7 @@ remarkAttr.SUPPORTED_ELEMENTS = supportedElements;
 
 module.exports = remarkAttr;
 
+/* Function that is exported */
 function remarkAttr(userConfig) {
   const parser = this.Parser;
 
@@ -183,6 +198,7 @@ function remarkAttr(userConfig) {
   const tokenizers = parser.prototype.inlineTokenizers;
   const tokenizersBlock = parser.prototype.blockTokenizers;
 
+  // For each elements, replace the old tokenizer by the new one
   config.elements.forEach(elem => {
     if (supportedElements.indexOf(elem) >= 0) {
       if (blockElements.indexOf(elem) >= 0) {
