@@ -29,7 +29,6 @@
     "rehype-stringify": "^3.0.0",
     "remark-parse": "^5.0.0",
     "remark-rehype": "^3.0.0",
-    "stream": "0.0.2",
     "unified": "^7.0.0",
     "xo": "^0.21.0"
   },
