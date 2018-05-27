@@ -2,9 +2,7 @@
 
 This plugin add support of custom attributes to Markdown syntax.
 
-**This is an alpha not ready to be used in production.** but will be soon.
-
-Also for security reasons, this plugin use [html-element-attributes](https://github.com/wooorm/html-element-attributes).  
+For **security reasons**, this plugin use [html-element-attributes](https://github.com/wooorm/html-element-attributes).  
 The use of JavaScript attributes (onload for example) is not allowed by default.
 
 ## Default Syntax
