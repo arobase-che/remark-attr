@@ -127,3 +127,24 @@ test('extended-global', t => {
   t.deepEqual(parse(contents), parse(`<p> <em>Wait</em> ! You are <strong ex-attr="true">beautiful</strong> !</p>`));
 });
 
+test('extended-invalid-scope', t => {
+  const renderExtended = generateExtendParser({scope: 'invalid', extend: {strong: ['exAttr']}});
+  const invalidString = `*Wait* ! You are **beautiful**{ exAttr="true" onload="qdss" pss="NOK" } !`;
+  const {contents} = renderExtended(invalidString);
+  t.deepEqual(parse(contents), parse(`<p><em>Wait</em> ! You are <strong ex-attr="true">beautiful</strong> !</p>`));
+});
+
+test('invalid-scope', t => {
+  const renderExtended = generateExtendParser({extend: 'exAttr'});
+  const invalidString = ` *Wait* ! I **love**{ exAttr="true" onload="qdss" pss="NOK" } you !`;
+  const {contents} = renderExtended(invalidString);
+  t.deepEqual(parse(contents), parse(`<p> <em>Wait</em> ! I <strong>love</strong> you !</p>`));
+});
+
+test('invalid-extend', t => {
+  const renderExtended = generateExtendParser({extend: 'exAttr'});
+  const invalidString = ` *Wait* ! I **love**{ exAttr="true" onload="qdss" attr="NOK" style="color: red;"} you!`;
+  const {contents} = renderExtended(invalidString);
+  t.deepEqual(parse(contents), parse(`<p> <em>Wait</em> ! I <strong style="color: red;">love</strong> you!</p>`));
+});
+

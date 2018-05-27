@@ -151,6 +151,7 @@ function filterAttributes(prop, config, type) {
       }
       break;
     case 'extended':
+    default:
       inScope = p => extendTag && type in extendTag && extendTag[type].indexOf(p) >= 0;
       inScope = orFunc(inScope, p => '*' in extendTag && extendTag['*'].indexOf(p) >= 0);
       // Or if it in the specific scope, fallthrough
@@ -158,7 +159,6 @@ function filterAttributes(prop, config, type) {
       inScope = orFunc(inScope, isSpecific);
       // Or if it in the global scope fallthrough
     case 'global':
-    default:
       inScope = orFunc(inScope, isGlobal);
       if (allowDangerousDOMEventHandlers) { // If allowed add dangerous attributes to global scope
         inScope = orFunc(inScope, isDangerous);
