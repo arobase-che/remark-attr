@@ -87,7 +87,7 @@ function tokenizeGenerator(prefix, oldParser, config) {
     // Then we check for attributes
     if (index + prefix.length < length && value.charAt(index + prefix.length) === '{') {
     // If any, parse it
-      parsedAttr = parseAttr(value, index + prefix.length);
+      parsedAttr = parseAttr(value, index + prefix.length, config.mdAttrConfig);
     }
 
     // If parsed configure the node
@@ -223,7 +223,7 @@ function tokenizeFencedCode(oldParser, config) {
       }
 
       if (infoPart) {
-        parsedAttr = parseAttr(infoPart, 0);
+        parsedAttr = parseAttr(infoPart, 0, config.mdAttrConfig);
       }
     }
 
@@ -232,7 +232,7 @@ function tokenizeFencedCode(oldParser, config) {
     // Then we check for attributes
     if (index + prefix.length < length && value.charAt(index + prefix.length) === '{') {
     // If any, parse it
-      parsedAttr = {...parsedAttr, ...parseAttr(value, index + prefix.length)};
+      parsedAttr = {...parsedAttr, ...parseAttr(value, index + prefix.length, config.mdAttrConfig)};
       parsedByCustomAttr = Boolean(parsedAttr);
     }
 
@@ -277,6 +277,7 @@ function remarkAttr(userConfig) {
     elements: supportedElements,
     extend: {},
     scope: 'extended',
+    mdAttrConfig: undefined,
   };
   const config = {...defaultConfig, ...userConfig};
 
