@@ -3,8 +3,11 @@
 const parseAttr = require('md-attr-parser');
 const htmlElemAttr = require('html-element-attributes');
 
-const supportedElements = ['link', 'atxHeading', 'strong', 'emphasis', 'deletion', 'code', 'setextHeading'];
+const supportedElements = ['link', 'atxHeading', 'strong', 'emphasis', 'deletion', 'code', 'setextHeading', 'fencedCode'];
 const blockElements = ['atxHeading', 'setextHeading'];
+const particularElements = ['fencedCode'];
+
+const particularTokenize = {};
 
 // The list of DOM Event handler
 const DOMEventHandler = [
@@ -40,6 +43,7 @@ const convTypeTag = {
   emphasis: 'em',
   delete: 's',
   inlineCode: 'code',
+  code: 'code',
   '*': '*',
 };
 
@@ -175,6 +179,91 @@ function filterAttributes(prop, config, type) {
   return prop;
 }
 
+/* This is a special modification of the function tokenizeGenerator
+ * to parse the fencedCode info string and the fallback
+ * customAttr parser
+ */
+function tokenizeFencedCode(oldParser, config) {
+  const prefix = '\n';
+  function token(eat, value, silent) {
+    // This we call the old tokenize
+    const self = this;
+    let eaten = oldParser.call(self, eat, value, silent);
+
+    let index = 0;
+    let parsedAttr;
+    let parsedByCustomAttr = false;
+    const {length} = value;
+
+    if (!eaten || !eaten.position) {
+      return undefined;
+    }
+
+    const type = convTypeTag[eaten.type];
+
+    // First, parse the info string
+    // which is the 'lang' attributes of 'eaten'.
+
+    if (eaten.lang) {
+      let infoPart = '';
+      if (eaten.lang.indexOf(' ') >= 0) {
+        if (eaten.lang.indexOf('{') >= 0) {
+          const posStart = Math.min(eaten.lang.indexOf(' '), eaten.lang.indexOf('{'));
+          infoPart = eaten.lang.substr(posStart);
+
+          if (posStart === eaten.lang.indexOf('{')) {
+            eaten.lang = eaten.lang.substr(0, eaten.lang.indexOf('{')) + ' ' + infoPart;
+          }
+        } else {
+          infoPart = eaten.lang.substr(eaten.lang.indexOf(' '));
+        }
+      } else if (eaten.lang.indexOf('{') >= 0) {
+        infoPart = eaten.lang.substr(eaten.lang.indexOf('{'));
+        eaten.lang = eaten.lang.substr(0, eaten.lang.indexOf('{')) + ' ' + infoPart;
+      }
+
+      if (infoPart) {
+        parsedAttr = parseAttr(infoPart, 0);
+      }
+    }
+
+    index = eaten.position.end.offset - eaten.position.start.offset;
+
+    // Then we check for attributes
+    if (index + prefix.length < length && value.charAt(index + prefix.length) === '{') {
+    // If any, parse it
+      parsedAttr = {...parsedAttr, ...parseAttr(value, index + prefix.length)};
+      parsedByCustomAttr = Boolean(parsedAttr);
+    }
+
+    // If parsed configure the node
+    if (parsedAttr) {
+      if (config.scope && config.scope !== 'none') {
+        const filtredProp = filterAttributes(parsedAttr.prop, config, type);
+
+        if (filtredProp !== {}) {
+          if (eaten.data) {
+            eaten.data.hProperties = {...eaten.data.hProperties, ...filtredProp};
+          } else {
+            eaten.data = {hProperties: filtredProp};
+          }
+        }
+      }
+      if (parsedByCustomAttr) {
+        eaten = eat(prefix + parsedAttr.eaten)(eaten);
+      }
+    }
+
+    return eaten;
+  }
+
+  // Return the new tokenizer function
+
+  return token;
+}
+
+particularTokenize.fencedCode = tokenizeFencedCode;
+
 remarkAttr.SUPPORTED_ELEMENTS = supportedElements;
 
 module.exports = remarkAttr;
@@ -204,6 +293,9 @@ function remarkAttr(userConfig) {
       if (blockElements.indexOf(elem) >= 0) {
         const oldElem = tokenizersBlock[elem];
         tokenizersBlock[elem] = tokenizeGenerator('\n', oldElem, config);
+      } else if (particularElements.indexOf(elem) >= 0) {
+        const oldElem = tokenizersBlock[elem];
+        tokenizersBlock[elem] = particularTokenize[elem](oldElem, config);
       } else {
         const oldElem = tokenizers[elem];
         const elemTokenize = tokenizeGenerator('', oldElem, config);
