@@ -43,13 +43,6 @@ const generateExtendParser = extendsOptions => text => unified()
 
 const parse = x => parse5.parse(x);
 
-/*
- * TODO :
- *  - Invalid scope
- *  - Invalid extended
- *  - aria attributes
- */
-
 const mainTestString = `Inline *test*{style="em:4"} paragraph. Use **multiple**{ style="color:pink"} inline ~~block~~ tag. Line \`tagCode\`{ style="color:yellow"}.`;
 
 test('basic-default', t => {
@@ -146,5 +139,11 @@ test('invalid-extend', t => {
   const invalidString = ` *Wait* ! I **love**{ exAttr="true" onload="qdss" attr="NOK" style="color: red;"} you!`;
   const {contents} = renderExtended(invalidString);
   t.deepEqual(parse(contents), parse(`<p> <em>Wait</em> ! I <strong style="color: red;">love</strong> you!</p>`));
+});
+
+test('global-aria', t => {
+  const invalidString = ` *Wait* ! I **love**{ style="color: pink;" aria-love="true" } you!`;
+  const {contents} = renderDefault(invalidString);
+  t.deepEqual(parse(contents), parse(`<p> <em>Wait</em> ! I <strong style="color: pink;" aria-love="true">love</strong> you!</p>`));
 });
 
