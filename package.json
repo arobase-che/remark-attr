@@ -2,15 +2,13 @@
   "name": "remark-attr",
   "version": "0.6.3",
   "description": "Add support of custom attributes to Markdown syntax.",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
     "pretest": "xo",
+    "prepare": "del-cli dist && cross-env BABEL_ENV=production babel src --out-dir dist",
     "test": "ava"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/arobase-che/remark-attr.git"
-  },
+  "repository": "github:arobase-che/remark-attr",
   "keywords": [
     "markdown",
     "attribute",
@@ -24,6 +22,11 @@
   "homepage": "https://github.com/arobase-che/remark-attr#readme",
   "devDependencies": {
     "ava": "^0.25.0",
+    "babel-cli": "^6.26.0",
+    "babel-preset-env": "^1.6.1",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
+    "cross-env": "^5.1.4",
+    "del-cli": "^1.1.0",
     "parse5": "^5.0.0",
     "rehype-raw": "^2.0.0",
     "rehype-stringify": "^3.0.0",
