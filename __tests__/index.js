@@ -43,7 +43,7 @@ const generateExtendParser = extendsOptions => text => unified()
 
 const parse = x => parse5.parse(x);
 
-const mainTestString = `Inline *test*{style="em:4"} paragraph. Use **multiple**{ style="color:pink"} inline ~~block~~ tag. Line \`tagCode\`{ style="color:yellow"}.`;
+const mainTestString = 'Inline *test*{style="em:4"} paragraph. Use **multiple**{ style="color:pink"} inline ~~block~~ tag. Line `tagCode`{ style="color:yellow"}.';
 
 test('basic-default', t => {
   const {contents} = renderDefault(mainTestString);
@@ -64,7 +64,7 @@ test('basic-raw', t => {
 
 test('em', t => {
   const {contents} = render('textexamplenointerest **Important**{style=4em} still no interest');
-  t.deepEqual(parse(contents), parse(`<p>textexamplenointerest <strong style="4em">Important</strong> still no interest</p>`));
+  t.deepEqual(parse(contents), parse('<p>textexamplenointerest <strong style="4em">Important</strong> still no interest</p>'));
 });
 
 test('readme-default', t => {
@@ -114,36 +114,36 @@ This is an awesome image : <img src="aws://image.jpg" alt="Awesome image" qualit
 });
 
 test('extended-global', t => {
-  const renderExtended = generateExtendParser({extend: {'*': ['exAttr']}});
-  const globalString = ` *Wait* ! You are **beautiful**{ exAttr="true" } !`;
+  const renderExtended = generateExtendParser({extend: {'*': ['ex-attr']}});
+  const globalString = ' *Wait* ! You are **beautiful**{ ex-attr="true" } !';
   const {contents} = renderExtended(globalString);
-  t.deepEqual(parse(contents), parse(`<p> <em>Wait</em> ! You are <strong ex-attr="true">beautiful</strong> !</p>`));
+  t.deepEqual(parse(contents), parse('<p> <em>Wait</em> ! You are <strong ex-attr="true">beautiful</strong> !</p>'));
 });
 
 test('extended-invalid-scope', t => {
-  const renderExtended = generateExtendParser({scope: 'invalid', extend: {strong: ['exAttr']}});
-  const invalidString = `*Wait* ! You are **beautiful**{ exAttr="true" onload="qdss" pss="NOK" } !`;
+  const renderExtended = generateExtendParser({scope: 'invalid', extend: {strong: ['ex-attr']}});
+  const invalidString = '*Wait* ! You are **beautiful**{ ex-attr="true" onload="qdss" pss="NOK" } !';
   const {contents} = renderExtended(invalidString);
-  t.deepEqual(parse(contents), parse(`<p><em>Wait</em> ! You are <strong ex-attr="true">beautiful</strong> !</p>`));
+  t.deepEqual(parse(contents), parse('<p><em>Wait</em> ! You are <strong ex-attr="true">beautiful</strong> !</p>'));
 });
 
 test('invalid-scope', t => {
   const renderExtended = generateExtendParser({extend: 'exAttr'});
-  const invalidString = ` *Wait* ! I **love**{ exAttr="true" onload="qdss" pss="NOK" } you !`;
+  const invalidString = ' *Wait* ! I **love**{ exAttr="true" onload="qdss" pss="NOK" } you !';
   const {contents} = renderExtended(invalidString);
-  t.deepEqual(parse(contents), parse(`<p> <em>Wait</em> ! I <strong>love</strong> you !</p>`));
+  t.deepEqual(parse(contents), parse('<p> <em>Wait</em> ! I <strong>love</strong> you !</p>'));
 });
 
 test('invalid-extend', t => {
   const renderExtended = generateExtendParser({extend: 'exAttr'});
-  const invalidString = ` *Wait* ! I **love**{ exAttr="true" onload="qdss" attr="NOK" style="color: red;"} you!`;
+  const invalidString = ' *Wait* ! I **love**{ exAttr="true" onload="qdss" attr="NOK" style="color: red;"} you!';
   const {contents} = renderExtended(invalidString);
-  t.deepEqual(parse(contents), parse(`<p> <em>Wait</em> ! I <strong style="color: red;">love</strong> you!</p>`));
+  t.deepEqual(parse(contents), parse('<p> <em>Wait</em> ! I <strong style="color: red;">love</strong> you!</p>'));
 });
 
 test('global-aria', t => {
-  const invalidString = ` *Wait* ! I **love**{ style="color: pink;" aria-love="true" } you!`;
+  const invalidString = ' *Wait* ! I **love**{ style="color: pink;" aria-love="true" } you!';
   const {contents} = renderDefault(invalidString);
-  t.deepEqual(parse(contents), parse(`<p> <em>Wait</em> ! I <strong style="color: pink;" aria-love="true">love</strong> you!</p>`));
+  t.deepEqual(parse(contents), parse('<p> <em>Wait</em> ! I <strong style="color: pink;" aria-love="true">love</strong> you!</p>'));
 });
 
