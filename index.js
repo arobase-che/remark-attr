@@ -279,7 +279,7 @@ function remarkAttr(userConfig) {
     scope: 'extended',
     mdAttrConfig: undefined,
   };
-  const config = {...defaultConfig, ...userConfig};
+  const config = Object.assign({}, defaultConfig, userConfig);
 
   if (!isRemarkParser(parser)) {
     throw new Error('Missing parser to attach `remark-attr` [link] (to)');
