@@ -3,11 +3,13 @@
 var parseAttr = require('md-attr-parser');
 var htmlElemAttr = require('html-element-attributes');
 
-var supportedElements = ['link', 'atxHeading', 'strong', 'emphasis', 'deletion', 'code', 'setextHeading'];
+var supportedElements = ['link', 'atxHeading', 'strong', 'emphasis', 'deletion', 'code', 'setextHeading', 'fencedCode'];
 var blockElements = ['atxHeading', 'setextHeading'];
+var particularElements = ['fencedCode'];
 
-// The list of DOM Event handler
-var DOMEventHandler = ['onabort', 'onautocomplete', 'onautocompleteerror', 'onblur', 'oncancel', 'oncanplay', 'oncanplaythrough', 'onchange', 'onclick', 'onclose', 'oncontextmenu', 'oncuechange', 'ondblclick', 'ondrag', 'ondragend', 'ondragenter', 'ondragexit', 'ondragleave', 'ondragover', 'ondragstart', 'ondrop', 'ondurationchange', 'onemptied', 'onended', 'onerror', 'onfocus', 'oninput', 'oninvalid', 'onkeydown', 'onkeypress', 'onkeyup', 'onload', 'onloadeddata', 'onloadedmetadata', 'onloadstart', 'onmousedown', 'onmouseenter', 'onmouseleave', 'onmousemove', 'onmouseout', 'onmouseover', 'onmouseup', 'onmousewheel', 'onpause', 'onplay', 'onplaying', 'onprogress', 'onratechange', 'onreset', 'onresize', 'onscroll', 'onseeked', 'onseeking', 'onselect', 'onshow', 'onsort', 'onstalled', 'onsubmit', 'onsuspend', 'ontimeupdate', 'ontoggle', 'onvolumechange', 'onwaiting'];
+var particularTokenize = {};
+
+var DOMEventHandler = require('./dom-event-handler.js');
 
 /* Table convertion between type and HTML tagName */
 var convTypeTag = {
@@ -18,6 +20,7 @@ var convTypeTag = {
   emphasis: 'em',
   delete: 's',
   inlineCode: 'code',
+  code: 'code',
   '*': '*'
 };
 
@@ -62,7 +65,7 @@ function tokenizeGenerator(prefix, oldParser, config) {
     // Then we check for attributes
     if (index + prefix.length < length && value.charAt(index + prefix.length) === '{') {
       // If any, parse it
-      parsedAttr = parseAttr(value, index + prefix.length);
+      parsedAttr = parseAttr(value, index + prefix.length, config.mdAttrConfig);
     }
 
     // If parsed configure the node
@@ -177,6 +180,71 @@ function filterAttributes(prop, config, type) {
   return prop;
 }
 
+/* This is a special modification of the function tokenizeGenerator
+ * to parse the fencedCode info string and the fallback
+ * customAttr parser
+ *
+ * It's only temporary
+ */
+function tokenizeFencedCode(oldParser, config) {
+  var prefix = '\n';
+  function token(eat, value, silent) {
+    // This we call the old tokenize
+    var self = this;
+    var eaten = oldParser.call(self, eat, value, silent);
+
+    var parsedAttr = void 0;
+    var parsedByCustomAttr = false;
+
+    if (!eaten || !eaten.position) {
+      return undefined;
+    }
+
+    var type = convTypeTag[eaten.type];
+
+    // First, parse the info string
+    // which is the 'lang' attributes of 'eaten'.
+
+    if (eaten.lang) {
+      // Then the meta
+      if (eaten.meta) {
+        parsedAttr = parseAttr(eaten.meta);
+      } else {
+        // If it's an old version, we can still find from the attributes
+        // from 'value' ¯\_(ツ)_/¯
+        // Bad hack, will be deleted soon
+        parsedAttr = parseAttr(value, value.indexOf(' '));
+      }
+    }
+
+    // If parsed configure the node
+    if (parsedAttr) {
+      if (config.scope && config.scope !== 'none') {
+        var filtredProp = filterAttributes(parsedAttr.prop, config, type);
+
+        if (filtredProp !== {}) {
+          if (eaten.data) {
+            eaten.data.hProperties = Object.assign({}, eaten.data.hProperties, filtredProp);
+          } else {
+            eaten.data = { hProperties: filtredProp };
+          }
+        }
+      }
+      if (parsedByCustomAttr) {
+        eaten = eat(prefix + parsedAttr.eaten)(eaten);
+      }
+    }
+
+    return eaten;
+  }
+
+  // Return the new tokenizer function
+
+  return token;
+}
+
+particularTokenize.fencedCode = tokenizeFencedCode;
+
 remarkAttr.SUPPORTED_ELEMENTS = supportedElements;
 
 module.exports = remarkAttr;
@@ -189,7 +257,8 @@ function remarkAttr(userConfig) {
     allowDangerousDOMEventHandlers: false,
     elements: supportedElements,
     extend: {},
-    scope: 'extended'
+    scope: 'extended',
+    mdAttrConfig: undefined
   };
   var config = Object.assign({}, defaultConfig, userConfig);
 
@@ -206,9 +275,12 @@ function remarkAttr(userConfig) {
       if (blockElements.indexOf(elem) >= 0) {
         var oldElem = tokenizersBlock[elem];
         tokenizersBlock[elem] = tokenizeGenerator('\n', oldElem, config);
+      } else if (particularElements.indexOf(elem) >= 0) {
+        var _oldElem = tokenizersBlock[elem];
+        tokenizersBlock[elem] = particularTokenize[elem](_oldElem, config);
       } else {
-        var _oldElem = tokenizers[elem];
-        var elemTokenize = tokenizeGenerator('', _oldElem, config);
+        var _oldElem2 = tokenizers[elem];
+        var elemTokenize = tokenizeGenerator('', _oldElem2, config);
         elemTokenize.locator = tokenizers[elem].locator;
         tokenizers[elem] = elemTokenize;
       }

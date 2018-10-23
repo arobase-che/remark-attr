@@ -159,7 +159,7 @@ This is an awesome code
 });
 
 test('fenced code brackets', t => {
-  const fencedCodeString = `~~~lang{info=string}
+  const fencedCodeString = `~~~lang {info=string}
 This is an awesome code
 
 ~~~
@@ -176,30 +176,6 @@ This is an awesome code
 ~~~
 `;
   const {contents} = render(fencedCodeString);
-  t.deepEqual(parse(contents), parse(`<pre><code class="language-lang" info="string">This is an awesome code
-</code></pre>`));
-});
-
-test('fenced code fallback', t => {
-  const fallbackFCstring = `~~~lang
-This is an awesome code
-
-~~~
-{info=string}
-`;
-  const {contents} = render(fallbackFCstring);
-  t.deepEqual(parse(contents), parse(`<pre><code class="language-lang" info="string">This is an awesome code
-</code></pre>`));
-});
-
-test('fenced code mix', t => {
-  const fallbackFCstring = `~~~lang{info=strong}
-This is an awesome code
-
-~~~
-{info=string}
-`;
-  const {contents} = render(fallbackFCstring);
   t.deepEqual(parse(contents), parse(`<pre><code class="language-lang" info="string">This is an awesome code
 </code></pre>`));
 });

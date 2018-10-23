@@ -159,6 +159,8 @@ function filterAttributes(prop, config, type) {
 /* This is a special modification of the function tokenizeGenerator
  * to parse the fencedCode info string and the fallback
  * customAttr parser
+ *
+ * It's only temporary
  */
 function tokenizeFencedCode(oldParser, config) {
   const prefix = '\n';
@@ -167,10 +169,8 @@ function tokenizeFencedCode(oldParser, config) {
     const self = this;
     let eaten = oldParser.call(self, eat, value, silent);
 
-    let index = 0;
     let parsedAttr;
-    let parsedByCustomAttr = false;
-    const {length} = value;
+    const parsedByCustomAttr = false;
 
     if (!eaten || !eaten.position) {
       return undefined;
@@ -182,35 +182,15 @@ function tokenizeFencedCode(oldParser, config) {
     // which is the 'lang' attributes of 'eaten'.
 
     if (eaten.lang) {
-      let infoPart = '';
-      if (eaten.lang.indexOf(' ') >= 0) {
-        if (eaten.lang.indexOf('{') >= 0) {
-          const posStart = Math.min(eaten.lang.indexOf(' '), eaten.lang.indexOf('{'));
-          infoPart = eaten.lang.substr(posStart);
-
-          if (posStart === eaten.lang.indexOf('{')) {
-            eaten.lang = eaten.lang.substr(0, eaten.lang.indexOf('{')) + ' ' + infoPart;
-          }
-        } else {
-          infoPart = eaten.lang.substr(eaten.lang.indexOf(' '));
-        }
-      } else if (eaten.lang.indexOf('{') >= 0) {
-        infoPart = eaten.lang.substr(eaten.lang.indexOf('{'));
-        eaten.lang = eaten.lang.substr(0, eaten.lang.indexOf('{')) + ' ' + infoPart;
+      // Then the meta
+      if (eaten.meta) {
+        parsedAttr = parseAttr(eaten.meta);
+      } else {
+        // If it's an old version, we can still find from the attributes
+        // from 'value' ¯\_(ツ)_/¯
+        // Bad hack, will be deleted soon
+        parsedAttr = parseAttr(value, value.indexOf(' '));
       }
-
-      if (infoPart) {
-        parsedAttr = parseAttr(infoPart, 0, config.mdAttrConfig);
-      }
-    }
-
-    index = eaten.position.end.offset - eaten.position.start.offset;
-
-    // Then we check for attributes
-    if (index + prefix.length < length && value.charAt(index + prefix.length) === '{') {
-    // If any, parse it
-      parsedAttr = {...parsedAttr, ...parseAttr(value, index + prefix.length, config.mdAttrConfig)};
-      parsedByCustomAttr = Boolean(parsedAttr);
     }
 
     // If parsed configure the node

@@ -1,6 +1,6 @@
 'use strict';
 
-module.export = [
+module.exports = [
   'onabort',
   'onautocomplete',
   'onautocompleteerror',
