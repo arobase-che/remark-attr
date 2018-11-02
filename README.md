@@ -1,8 +1,8 @@
 # remark-attr
 
-This plugin add support of custom attributes to Markdown syntax.
+This plugin adds support of custom attributes to Markdown syntax.
 
-For **security reasons**, this plugin use [html-element-attributes](https://github.com/wooorm/html-element-attributes).  
+For **security reasons**, this plugin uses [html-element-attributes](https://github.com/wooorm/html-element-attributes).  
 The use of JavaScript attributes (onload for example) is not allowed by default.
 
 ## Default Syntax
@@ -145,7 +145,7 @@ Example :
 extend: {atxHeading: ['original', 'quality', 'format', 'toc']}
 ```
 
-With this configuration, if the scope permit it, 4 mores attributes will be supported for atxHeading elements.
+With this configuration, if the scope permits it, 4 mores attributes will be supported for atxHeading elements.
 
 ###### `options.scope`
 
