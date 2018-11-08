@@ -1,6 +1,6 @@
 {
   "name": "remark-attr",
-  "version": "0.7.1",
+  "version": "0.8.0",
   "description": "Add support of custom attributes to Markdown syntax.",
   "main": "dist/index.js",
   "scripts": {
@@ -15,24 +15,25 @@
     "plugin"
   ],
   "author": "ache <ache@ache.one>",
-  "license": "MIT",
+  "license": "GPL-3.0-or-later",
   "bugs": {
     "url": "https://github.com/arobase-che/remark-attr/issues"
   },
   "homepage": "https://github.com/arobase-che/remark-attr#readme",
   "devDependencies": {
+    "@babel/cli": "^7.1.5",
+    "@babel/core": "^7.1.5",
+    "@babel/plugin-proposal-object-rest-spread": "^7.0.0",
+    "@babel/preset-env": "^7.1.5",
     "ava": "^0.25.0",
-    "babel-cli": "^6.26.0",
-    "babel-plugin-transform-object-rest-spread": "^6.26.0",
-    "babel-preset-env": "^1.6.1",
-    "cross-env": "^5.1.4",
+    "cross-env": "^5.2.0",
     "del-cli": "^1.1.0",
-    "parse5": "^5.0.0",
+    "parse5": "^5.1.0",
     "rehype-raw": "^3.0.0",
     "rehype-stringify": "^4.0.0",
-    "remark-parse": "^5.0.0",
+    "remark-parse": "^6.0.1",
     "remark-rehype": "^3.0.1",
-    "unified": "^7.0.0",
+    "unified": "^7.0.1",
     "xo": "^0.23.0"
   },
   "xo": {
@@ -46,6 +47,6 @@
   },
   "dependencies": {
     "html-element-attributes": "^2.0.0",
-    "md-attr-parser": "^1.1.6"
+    "md-attr-parser": "^1.2.0"
   }
 }
