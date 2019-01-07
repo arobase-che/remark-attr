@@ -1,6 +1,6 @@
 {
   "name": "remark-attr",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "description": "Add support of custom attributes to Markdown syntax.",
   "main": "dist/index.js",
   "scripts": {
@@ -14,6 +14,10 @@
     "attribute",
     "plugin"
   ],
+  "dependencies": {
+    "html-element-attributes": "^2.0.0",
+    "md-attr-parser": "^1.2.1"
+  },
   "author": "ache <ache@ache.one>",
   "license": "GPL-3.0-or-later",
   "bugs": {
@@ -21,20 +25,20 @@
   },
   "homepage": "https://github.com/arobase-che/remark-attr#readme",
   "devDependencies": {
-    "@babel/cli": "^7.1.5",
-    "@babel/core": "^7.1.5",
-    "@babel/plugin-proposal-object-rest-spread": "^7.0.0",
-    "@babel/preset-env": "^7.1.5",
-    "ava": "^0.25.0",
-    "cross-env": "^5.2.0",
-    "del-cli": "^1.1.0",
-    "parse5": "^5.1.0",
-    "rehype-raw": "^3.0.0",
-    "rehype-stringify": "^4.0.0",
-    "remark-parse": "^6.0.1",
-    "remark-rehype": "^3.0.1",
-    "unified": "^7.0.1",
-    "xo": "^0.23.0"
+    "@babel/cli": "7.x",
+    "@babel/core": "7.x",
+    "@babel/plugin-proposal-object-rest-spread": "7.x",
+    "@babel/preset-env": "7.x",
+    "ava": "1.x",
+    "cross-env": "5.x",
+    "del-cli": "x",
+    "parse5": "5.x",
+    "rehype-raw": "4.x",
+    "rehype-stringify": "5.x",
+    "remark-parse": "6.x",
+    "remark-rehype": "4.x",
+    "unified": "7.x",
+    "xo": "0.23.x"
   },
   "xo": {
     "space": true,
@@ -44,9 +48,5 @@
         "always-multiline"
       ]
     }
-  },
-  "dependencies": {
-    "html-element-attributes": "^2.0.0",
-    "md-attr-parser": "^1.2.0"
   }
 }
