@@ -29,16 +29,16 @@
     "@babel/core": "7.x",
     "@babel/plugin-proposal-object-rest-spread": "7.x",
     "@babel/preset-env": "7.x",
-    "ava": "1.x",
-    "cross-env": "5.x",
+    "ava": "2.x",
+    "cross-env": "6.x",
     "del-cli": "x",
     "parse5": "5.x",
     "rehype-raw": "4.x",
-    "rehype-stringify": "5.x",
-    "remark-parse": "6.x",
-    "remark-rehype": "4.x",
-    "unified": "7.x",
-    "xo": "0.23.x"
+    "rehype-stringify": "6.x",
+    "remark-parse": "7.x",
+    "remark-rehype": "5.x",
+    "unified": "8.x",
+    "xo": "0.24.x"
   },
   "xo": {
     "space": true,

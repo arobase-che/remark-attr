@@ -1,16 +1,15 @@
 'use strict';
 
-import plugin from '..';
-
-import unified from 'unified';
-import {readFileSync as file} from 'fs';
 import {join} from 'path';
+import {readFileSync as file} from 'fs';
 import test from 'ava';
 import raw from 'rehype-raw';
 import reParse from 'remark-parse';
 import stringify from 'rehype-stringify';
 import remark2rehype from 'remark-rehype';
+import unified from 'unified';
 import parse5 from 'parse5';
+import plugin from '..';
 
 const renderDefault = text => unified()
   .use(reParse)
