@@ -19,7 +19,7 @@
     "md-attr-parser": "^1.2.1"
   },
   "author": "ache <ache@ache.one>",
-  "license": "GPL-3.0-or-later",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/arobase-che/remark-attr/issues"
   },

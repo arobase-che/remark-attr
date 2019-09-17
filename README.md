@@ -159,7 +159,7 @@ A string with the value `"global"` or `"specific"` or `"extented"` or `"none"` o
 
 ## License
 
-Distributed under a MIT-like license.
+Distributed under a MIT license.
 
 [npm]: https://www.npmjs.com/package/remark-attr
 
