@@ -1,6 +1,6 @@
 {
   "name": "remark-attr",
-  "version": "0.8.3",
+  "version": "0.8.4",
   "description": "Add support of custom attributes to Markdown syntax.",
   "main": "dist/index.js",
   "scripts": {
