@@ -154,6 +154,7 @@ This is an awesome code
 `;
   const {contents} = render(fencedCodeString);
   t.deepEqual(parse(contents), parse(`<pre><code class="language-lang" info="string">This is an awesome code
+
 </code></pre>`));
 });
 
@@ -165,6 +166,7 @@ This is an awesome code
 `;
   const {contents} = render(fencedCodeString);
   t.deepEqual(parse(contents), parse(`<pre><code class="language-lang" info="string">This is an awesome code
+
 </code></pre>`));
 });
 
@@ -176,6 +178,7 @@ This is an awesome code
 `;
   const {contents} = render(fencedCodeString);
   t.deepEqual(parse(contents), parse(`<pre><code class="language-lang" info="string">This is an awesome code
+
 </code></pre>`));
 });
 

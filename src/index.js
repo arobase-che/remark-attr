@@ -79,11 +79,13 @@ function tokenizeGenerator(prefix, oldParser, config) {
           }
         }
       }
+
       eaten = eat(prefix + parsedAttr.eaten)(eaten);
     }
 
     return eaten;
   }
+
   // Return the new tokenizer function
   return token;
 }
@@ -130,6 +132,7 @@ function filterAttributes(prop, config, type) {
       } else {
         inScope = x => !isDangerous(x);
       }
+
       break;
     case 'extended':
     default:
@@ -206,6 +209,7 @@ function tokenizeFencedCode(oldParser, config) {
           }
         }
       }
+
       if (parsedByCustomAttr) {
         eaten = eat(prefix + parsedAttr.eaten)(eaten);
       }
