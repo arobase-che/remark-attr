@@ -142,7 +142,7 @@ An object that extends the list of attributes supported for some elements.
 Example : 
 
 ```
-extend: {atxHeading: ['original', 'quality', 'format', 'toc']}
+extend: {heading: ['original', 'quality', 'format', 'toc']}
 ```
 
 With this configuration, if the scope permits it, 4 mores attributes will be supported for atxHeading elements.
