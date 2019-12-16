@@ -114,7 +114,7 @@ function filterAttributes(prop, config, type) {
 
   const isDangerous = p => DOMEventHandler.indexOf(p) >= 0;
   const isSpecific = p => type in specific && specific[type].indexOf(p) >= 0;
-  const isGlobal = p => htmlElemAttr['*'].indexOf(p) >= 0 || p.match(/^aria-[a-z]{2,24}$/) || p.match(/^data-[a-z]{2,24}$/);
+  const isGlobal = p => htmlElemAttr['*'].indexOf(p) >= 0 || p.match(/^aria-[a-z][a-z.-_0-9]*$/) || p.match(/^data-[a-z][a-z_.-0-9]*$/);
 
   let inScope = _ => false;
 

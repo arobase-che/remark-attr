@@ -190,5 +190,44 @@ This is a test image : ![test](img.jpg){data-id=2}
   const {contents} = renderExtended(extentedString);
   t.deepEqual(parse(contents), parse(`<p><em>Wait</em> !
 This is a test image : <img src="img.jpg" alt="test" data-id="2"></p>`));
+
+  t.notDeepEqual(parse(contents), parse(`<p><em>Wait</em> !
+This is a test image : <img src="img.jpg" alt="test"></p>`));
+});
+
+test('global custom attributes 2', t => {
+  const renderExtended = generateExtendParser({extends: {image: ['quality']}});
+  const extentedString = `*Wait* !
+This is a test image : ![test](img.jpg){data-id-node=2}
+`;
+  const {contents} = renderExtended(extentedString);
+  t.deepEqual(parse(contents), parse(`<p><em>Wait</em> !
+This is a test image : <img src="img.jpg" alt="test" data-id-node="2"></p>`));
+
+  t.notDeepEqual(parse(contents), parse(`<p><em>Wait</em> !
+This is a test image : <img src="img.jpg" alt="test"></p>`));
+});
+
+test('global custom attributes 3', t => {
+  const renderExtended = generateExtendParser({extends: {image: ['quality']}});
+  const extentedString = `*Wait* !
+This is a test image : ![test](img.jpg){data--id=2}
+`;
+  const {contents} = renderExtended(extentedString);
+  t.deepEqual(parse(contents), parse(`<p><em>Wait</em> !
+This is a test image : <img src="img.jpg" alt="test"></p>`));
+});
+
+test('global custom attributes 4', t => {
+  const renderExtended = generateExtendParser({extends: {image: ['quality']}});
+  const extentedString = `*Wait* !
+This is a test image : ![test](img.jpg){data-i=2}
+`;
+  const {contents} = renderExtended(extentedString);
+  t.deepEqual(parse(contents), parse(`<p><em>Wait</em> !
+This is a test image : <img src="img.jpg" alt="test" data-i=2></p>`));
+
+  t.notDeepEqual(parse(contents), parse(`<p><em>Wait</em> !
+This is a test image : <img src="img.jpg" alt="test"></p>`));
 });
 

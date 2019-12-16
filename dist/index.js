@@ -128,7 +128,7 @@ function filterAttributes(prop, config, type) {
   };
 
   var isGlobal = function isGlobal(p) {
-    return htmlElemAttr['*'].indexOf(p) >= 0 || p.match(/^aria-[a-z]{2,24}$/) || p.match(/^data-[a-z]{2,24}$/);
+    return htmlElemAttr['*'].indexOf(p) >= 0 || p.match(/^aria-[a-z][a-z.-_0-9]*$/) || p.match(/^data-[a-z][a-z_.-0-9]*$/);
   };
 
   var inScope = function inScope(_) {
