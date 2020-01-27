@@ -44,6 +44,8 @@ const parse = x => parse5.parse(x);
 
 const mainTestString = 'Inline *test*{style="em:4"} paragraph. Use **multiple**{ style="color:pink"} inline ~~block~~ tag. Line `tagCode`{ style="color:yellow"}.';
 
+/* Basic tests */
+
 test('basic-default', t => {
   const {contents} = renderDefault(mainTestString);
   t.deepEqual(parse(contents), parse('<p>Inline <em style="em:4">test</em> paragraph. Use <strong style="color:pink">multiple</strong> inline <del>block</del> tag. Line <code style="color:yellow">tagCode</code>.</p>'));
@@ -61,10 +63,85 @@ test('basic-raw', t => {
 <p>Inline <em style="em:4">test</em> paragraph. Use <strong style="color:pink">multiple</strong> inline <del>block</del> tag. Line <code style="color:yellow">tagCode</code>.</p>`));
 });
 
+/* Support tests
+ *
+ * They test the support of one element each.
+ */
+
 test('em', t => {
   const {contents} = render('textexamplenointerest **Important**{style=4em} still no interest');
   t.deepEqual(parse(contents), parse('<p>textexamplenointerest <strong style="4em">Important</strong> still no interest</p>'));
 });
+
+test('fenced code', t => {
+  const fencedCodeString = `~~~lang info=string
+This is an awesome code
+
+~~~
+`;
+  const {contents} = render(fencedCodeString);
+  t.deepEqual(parse(contents), parse(`<pre><code class="language-lang" info="string">This is an awesome code
+
+</code></pre>`));
+});
+
+test('fenced code brackets', t => {
+  const fencedCodeString = `~~~lang {info=string}
+This is an awesome code
+
+~~~
+`;
+  const {contents} = render(fencedCodeString);
+  t.deepEqual(parse(contents), parse(`<pre><code class="language-lang" info="string">This is an awesome code
+
+</code></pre>`));
+});
+
+test('fenced code brackets and spaces', t => {
+  const fencedCodeString = `~~~lang   {info=string}
+This is an awesome code
+
+~~~
+`;
+  const {contents} = render(fencedCodeString);
+  t.deepEqual(parse(contents), parse(`<pre><code class="language-lang" info="string">This is an awesome code
+
+</code></pre>`));
+});
+
+test('image', t => {
+  const imageMd = '![Test image](url.com){ alt="This is alt"  longdesc="qsdf"}';
+  const {contents} = render(imageMd);
+  t.deepEqual(parse(contents), parse('<p><img src="url.com" alt="This is alt" longdesc="qsdf"/></p>'));
+});
+
+test('link', t => {
+  const linkMd = 'This is a link :[Test link](ache.one){ ping="http://ache.one/big.brother"}';
+  const {contents} = render(linkMd);
+  t.deepEqual(parse(contents), parse('<p>This is a link :<a href="ache.one" ping="http://ache.one/big.brother">Test link</a></p>'));
+});
+
+test('atx header', t => {
+  const imageMd = `
+Title of the article
+====================
+{data-id="title"}
+
+`;
+  const {contents} = render(imageMd);
+  t.deepEqual(parse(contents), parse('<h1 data-id="title">Title of the article</h1>'));
+});
+
+test('emphasis and strong', t => {
+  const emphasis = 'Hey ! *That looks cool*{style="color: blue;"} ! No, that\'s **not**{.not} !';
+  const {contents} = render(emphasis);
+  t.deepEqual(parse(contents), parse('<p>Hey ! <em style="color: blue;">That looks cool</em> ! No, that\'s <strong class="not">not</strong> !'));
+});
+
+/* Readme tests
+ *
+ * Should be act acording to the README.md
+ */
 
 test('readme-default', t => {
   const fileExample = file(join(__dirname, 'readMeTest.txt'));
@@ -91,6 +168,12 @@ test('readme', t => {
 <p>Your problem is <del style="color: grey;">at line 18</del>. My mistake, it's at line 14.</p>
 <p>You can use the <code language="c">fprintf</code> function to format the output to a file.</p>`));
 });
+
+/* Extended tests
+ *
+ * They test the support of the feature that extended the pool of attribute
+ * that can be parsed.
+ */
 
 test('extended', t => {
   const renderExtended = generateExtendParser({extends: {image: ['quality']}});
@@ -140,46 +223,17 @@ test('invalid-extend', t => {
   t.deepEqual(parse(contents), parse('<p> <em>Wait</em> ! I <strong style="color: red;">love</strong> you!</p>'));
 });
 
+/* Special attributes tests
+  *
+  * aria attributes: Focused on accessibility. They have the form aria-*
+  * Global custom attributes: User ended attributes. They have the form data-*
+  *
+  */
+
 test('global-aria', t => {
   const invalidString = ' *Wait* ! I **love**{ style="color: pink;" aria-love="true" } you!';
   const {contents} = renderDefault(invalidString);
   t.deepEqual(parse(contents), parse('<p> <em>Wait</em> ! I <strong style="color: pink;" aria-love="true">love</strong> you!</p>'));
-});
-
-test('fenced code', t => {
-  const fencedCodeString = `~~~lang info=string
-This is an awesome code
-
-~~~
-`;
-  const {contents} = render(fencedCodeString);
-  t.deepEqual(parse(contents), parse(`<pre><code class="language-lang" info="string">This is an awesome code
-
-</code></pre>`));
-});
-
-test('fenced code brackets', t => {
-  const fencedCodeString = `~~~lang {info=string}
-This is an awesome code
-
-~~~
-`;
-  const {contents} = render(fencedCodeString);
-  t.deepEqual(parse(contents), parse(`<pre><code class="language-lang" info="string">This is an awesome code
-
-</code></pre>`));
-});
-
-test('fenced code brackets and spaces', t => {
-  const fencedCodeString = `~~~lang   {info=string}
-This is an awesome code
-
-~~~
-`;
-  const {contents} = render(fencedCodeString);
-  t.deepEqual(parse(contents), parse(`<pre><code class="language-lang" info="string">This is an awesome code
-
-</code></pre>`));
 });
 
 test('global custom attribute', t => {
