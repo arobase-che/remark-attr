@@ -6,7 +6,7 @@
   "scripts": {
     "pretest": "xo",
     "prepare": "del-cli dist && cross-env BABEL_ENV=production babel src --out-dir dist",
-    "test": "ava"
+    "test": "ava --tap | tap-nyan"
   },
   "repository": "github:arobase-che/remark-attr",
   "keywords": [
@@ -37,6 +37,7 @@
     "rehype-stringify": "6.x",
     "remark-parse": "7.x",
     "remark-rehype": "5.x",
+    "tap-nyan": "1.1.0",
     "unified": "8.x",
     "xo": "0.24.x"
   },
