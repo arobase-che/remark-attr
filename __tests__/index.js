@@ -25,6 +25,13 @@ const render = text => unified()
   .use(stringify)
   .processSync(text);
 
+const renderFootnotes = text => unified()
+  .use(reParse, {footnotes: true})
+  .use(plugin, {allowDangerousDOMEventHandlers: false, scope: 'permissive'})
+  .use(remark2rehype)
+  .use(stringify)
+  .processSync(text);
+
 const renderRaw = text => unified()
   .use(reParse)
   .use(plugin, {allowDangerousDOMEventHandlers: false, scope: 'permissive'})
@@ -128,14 +135,38 @@ Title of the article
 {data-id="title"}
 
 `;
-  const {contents} = render(imageMd);
+  const {contents} = renderDefault(imageMd);
   t.deepEqual(parse(contents), parse('<h1 data-id="title">Title of the article</h1>'));
 });
 
 test('emphasis and strong', t => {
   const emphasis = 'Hey ! *That looks cool*{style="color: blue;"} ! No, that\'s **not**{.not} !';
-  const {contents} = render(emphasis);
+  const {contents} = renderDefault(emphasis);
   t.deepEqual(parse(contents), parse('<p>Hey ! <em style="color: blue;">That looks cool</em> ! No, that\'s <strong class="not">not</strong> !'));
+});
+
+test('linkReference', t => {
+  const linkRef = `[Google][google]{hreflang="en"}
+
+[google]: https://google.com
+`;
+  const {contents} = renderDefault(linkRef);
+  t.deepEqual(parse(contents), parse('<p><a href="https://google.com" hreflang="en">Google</a></p>'));
+});
+
+test('footnote', t => {
+  const footnotes = `Since XP is good we should always use XP[^xp]{ data-id=xp }
+
+[^xp]: Apply XP principe to XP.
+`;
+  const {contents} = renderFootnotes(footnotes);
+  t.deepEqual(parse(contents), parse(`<p>Since XP is good we should always use XP<sup id="fnref-xp"><a href="#fn-xp" class="footnote-ref" data-id="xp">xp</a></sup></p>
+<div class="footnotes">
+<hr>
+<ol>
+<li id="fn-xp">Apply XP principe to XP.<a href="#fnref-xp" class="footnote-backref">↩</a></li>
+</ol>
+</div>`));
 });
 
 /* Readme tests

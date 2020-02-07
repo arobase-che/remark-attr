@@ -3,7 +3,7 @@
 const parseAttr = require('md-attr-parser');
 const htmlElemAttr = require('html-element-attributes');
 
-const supportedElements = ['link', 'atxHeading', 'strong', 'emphasis', 'deletion', 'code', 'setextHeading', 'fencedCode'];
+const supportedElements = ['link', 'atxHeading', 'strong', 'emphasis', 'deletion', 'code', 'setextHeading', 'fencedCode', 'reference'];
 const blockElements = ['atxHeading', 'setextHeading'];
 const particularElements = ['fencedCode'];
 
@@ -21,6 +21,7 @@ const convTypeTag = {
   delete: 's',
   inlineCode: 'code',
   code: 'code',
+  linkReference: 'a',
   '*': '*',
 };
 
