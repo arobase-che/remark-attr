@@ -10,9 +10,9 @@ var parseAttr = require('md-attr-parser');
 
 var htmlElemAttr = require('html-element-attributes');
 
-var supportedElements = ['link', 'atxHeading', 'strong', 'emphasis', 'deletion', 'code', 'setextHeading', 'fencedCode', 'reference'];
+var supportedElements = ['link', 'atxHeading', 'strong', 'emphasis', 'deletion', 'code', 'setextHeading', 'fencedCode', 'reference', 'paragraph'];
 var blockElements = ['atxHeading', 'setextHeading'];
-var particularElements = ['fencedCode'];
+var particularElements = ['fencedCode', 'paragraph'];
 var particularTokenize = {};
 
 var DOMEventHandler = require('./dom-event-handler.js');
@@ -292,7 +292,15 @@ function remarkAttr(userConfig) {
         tokenizersBlock[elem] = tokenizeGenerator('\n', oldElem, config);
       } else if (particularElements.indexOf(elem) >= 0) {
         var _oldElem = tokenizersBlock[elem];
-        tokenizersBlock[elem] = particularTokenize[elem](_oldElem, config);
+
+        switch (elem) {
+          case 'paragraph':
+            tokenizersBlock[elem] = tokenizeGenerator('\n\n', _oldElem, config);
+            break;
+
+          default:
+            tokenizersBlock[elem] = particularTokenize[elem](_oldElem, config);
+        }
       } else {
         var _oldElem2 = tokenizers[elem];
         var elemTokenize = tokenizeGenerator('', _oldElem2, config);

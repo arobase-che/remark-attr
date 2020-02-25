@@ -169,6 +169,17 @@ test('footnote', t => {
 </div>`));
 });
 
+test('paragraph', t => {
+  const linkRef = `This is a nice little paragraph.
+
+{.with .some .extra .classes}
+
+Another without`;
+  const {contents} = renderDefault(linkRef);
+  t.deepEqual(parse(contents), parse(`<p class="with some extra classes">This is a nice little paragraph.</p>
+<p>Another without</p>`));
+});
+
 /* Readme tests
  *
  * Should be act acording to the README.md
