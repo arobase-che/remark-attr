@@ -169,6 +169,17 @@ test('footnote', t => {
 </div>`));
 });
 
+test('paragraph', t => {
+  const footnotes = `This is a nice little paragraph.
+{.with .some .extra .classes}
+
+Another without.
+`;
+  const {contents} = renderFootnotes(footnotes);
+  t.deepEqual(parse(contents), parse(`<p class="with some extra classes">This is a nice little paragraph.</p>
+<p>Another without.</p>`));
+});
+
 /* Readme tests
  *
  * Should be act acording to the README.md
@@ -314,5 +325,15 @@ This is a test image : <img src="img.jpg" alt="test" data-i=2></p>`));
 
   t.notDeepEqual(parse(contents), parse(`<p><em>Wait</em> !
 This is a test image : <img src="img.jpg" alt="test"></p>`));
+});
+
+test('empty paragraph', t => {
+  const footnotes = `{#p .extra .classes}
+
+Normal paragraph.
+`;
+  const {contents} = renderFootnotes(footnotes);
+  t.deepEqual(parse(contents), parse(`<p id="p" class="extra classes"></p>
+<p>Normal paragraph.</p>`));
 });
 

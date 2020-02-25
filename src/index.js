@@ -3,9 +3,9 @@
 const parseAttr = require('md-attr-parser');
 const htmlElemAttr = require('html-element-attributes');
 
-const supportedElements = ['link', 'atxHeading', 'strong', 'emphasis', 'deletion', 'code', 'setextHeading', 'fencedCode', 'reference'];
+const supportedElements = ['link', 'atxHeading', 'strong', 'emphasis', 'deletion', 'code', 'setextHeading', 'fencedCode', 'reference', 'paragraph'];
 const blockElements = ['atxHeading', 'setextHeading'];
-const particularElements = ['fencedCode'];
+const particularElements = ['fencedCode', 'paragraph'];
 
 const particularTokenize = {};
 
@@ -22,6 +22,7 @@ const convTypeTag = {
   inlineCode: 'code',
   code: 'code',
   linkReference: 'a',
+  paragraph: 'p',
   '*': '*',
 };
 
@@ -224,7 +225,77 @@ function tokenizeFencedCode(oldParser, config) {
   return token;
 }
 
+/* This is a special modification of the function tokenizeGenerator
+ * to parse the paragraph.
+ * customAttr parser
+ */
+
+function tokenizeParagraph(oldParser, config) {
+  function token(eat, value, silent) {
+    // This we call the old tokenize
+    const self = this;
+    const eaten = oldParser.call(self, eat, value, silent);
+
+    const type = convTypeTag[eaten.type];
+
+    if (!eaten || !eaten.position ||
+        !eaten.children || eaten.children.length === 0) {
+      return undefined;
+    }
+
+    // Looking for the last line of the last child.
+    // The last child must be of type text
+
+    const lastChild = eaten.children[eaten.children.length - 1];
+
+    if (!lastChild || !lastChild.type || lastChild.type !== 'text') {
+      return undefined;
+    }
+
+    const lcLines = lastChild.value.split('\n');
+
+    if (lcLines.length === 0) {
+      return undefined;
+    }
+
+    const attrs = lcLines[lcLines.length - 1];
+
+    const parsedAttr = parseAttr(attrs, 0, config.mdAttrConfig);
+
+    if (parsedAttr) {
+      if (!parsedAttr.eaten || parsedAttr.eaten !== attrs.trimEnd()) {
+        return undefined;
+      }
+
+      if (parsedAttr.eaten.trim()[0] !== '{' || parsedAttr.eaten.trim().slice(-1) !== '}') {
+        return undefined;
+      }
+
+      if (config.scope && config.scope !== 'none') {
+        const filtredProp = filterAttributes(parsedAttr.prop, config, type);
+
+        if (filtredProp !== {}) {
+          if (eaten.data) {
+            eaten.data.hProperties = filtredProp;
+          } else {
+            eaten.data = {
+              hProperties: filtredProp,
+            };
+          }
+        }
+      }
+
+      lastChild.value = lcLines.slice(0, -1).join('\n');
+    }
+
+    return eaten;
+  } // Return the new tokenizer function
+
+  return token;
+}
+
 particularTokenize.fencedCode = tokenizeFencedCode;
+particularTokenize.paragraph = tokenizeParagraph;
 
 remarkAttr.SUPPORTED_ELEMENTS = supportedElements;
 
