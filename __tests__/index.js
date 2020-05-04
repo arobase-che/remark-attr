@@ -128,11 +128,30 @@ test('link', t => {
   t.deepEqual(parse(contents), parse('<p>This is a link :<a href="ache.one" ping="http://ache.one/big.brother">Test link</a></p>'));
 });
 
-test('atx header', t => {
+test('header', t => {
   const imageMd = `
 Title of the article
 ====================
 {data-id="title"}
+
+`;
+  const {contents} = renderDefault(imageMd);
+  t.deepEqual(parse(contents), parse('<h1 data-id="title">Title of the article</h1>'));
+});
+
+test('atx header', t => {
+  const imageMd = `
+# Title of the article
+{data-id="title"}
+
+`;
+  const {contents} = renderDefault(imageMd);
+  t.deepEqual(parse(contents), parse('<h1 data-id="title">Title of the article</h1>'));
+});
+
+test('atx header inline', t => {
+  const imageMd = `
+# Title of the article {data-id="title"}
 
 `;
   const {contents} = renderDefault(imageMd);
