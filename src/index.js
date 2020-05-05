@@ -2,6 +2,7 @@
 
 const parseAttr = require('md-attr-parser');
 const htmlElemAttr = require('html-element-attributes');
+const isWhiteSpace = require('is-whitespace-character');
 
 const supportedElements = ['link', 'atxHeading', 'strong', 'emphasis', 'deletion', 'code', 'setextHeading', 'fencedCode', 'reference'];
 const blockElements = ['atxHeading', 'setextHeading'];
@@ -82,6 +83,65 @@ function tokenizeGenerator(prefix, oldParser, config) {
       }
 
       eaten = eat(prefix + parsedAttr.eaten)(eaten);
+    }
+
+    return eaten;
+  }
+
+  // Return the new tokenizer function
+  return token;
+}
+
+function tokenizeModifierGenerator(oldParser, config) {
+  function token(eat, value, silent) {
+    // This we call the old tokenize
+    const self = this;
+    let eaten = oldParser.call(self, eat, value, silent);
+
+    let index = 0;
+    const {length} = value;
+
+    if (!eaten || !eaten.position ||
+        !eaten.children || eaten.children.length <= 0) {
+      return eaten;
+    }
+
+    const type = convTypeTag[eaten.type];
+
+    const lastChild = eaten.children[eaten.children.length - 1];
+
+    if (!lastChild.value || lastChild.value.length <= 0 ||
+        lastChild.value[lastChild.value.length - 1] !== '}') {
+      return eaten;
+    }
+
+    index = lastChild.value.lastIndexOf('{');
+
+    const parsedAttr = parseAttr(lastChild.value, index, config.mdAttrConfig);
+
+    if (parsedAttr.eaten.length !== lastChild.value.length - index) {
+      return eaten;
+    }
+
+    index -= 1;
+    while (index >= 0 && isWhiteSpace(lastChild.value[index])) {
+      index -= 1;
+    }
+
+    // If parsed configure the node
+    if (parsedAttr) {
+      if (config.scope && config.scope !== 'none') {
+        const filtredProp = filterAttributes(parsedAttr.prop, config, type);
+        if (filtredProp !== {}) {
+          if (eaten.data) {
+            eaten.data.hProperties = filtredProp;
+          } else {
+            eaten.data = {hProperties: filtredProp};
+          }
+        }
+      }
+
+      lastChild.value = lastChild.value.slice(0, index + 1);
     }
 
     return eaten;
