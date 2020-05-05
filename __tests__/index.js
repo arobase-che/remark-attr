@@ -129,7 +129,7 @@ test('link', t => {
 });
 
 test('header', t => {
-  const headerMd= `
+  const headerMd = `
 Title of the article
 ====================
 {data-id="title"}

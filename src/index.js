@@ -96,10 +96,9 @@ function tokenizeModifierGenerator(oldParser, config) {
   function token(eat, value, silent) {
     // This we call the old tokenize
     const self = this;
-    let eaten = oldParser.call(self, eat, value, silent);
+    const eaten = oldParser.call(self, eat, value, silent);
 
     let index = 0;
-    const {length} = value;
 
     if (!eaten || !eaten.position ||
         !eaten.children || eaten.children.length <= 0) {
