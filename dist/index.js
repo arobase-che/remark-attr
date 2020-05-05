@@ -10,6 +10,8 @@ var parseAttr = require('md-attr-parser');
 
 var htmlElemAttr = require('html-element-attributes');
 
+var isWhiteSpace = require('is-whitespace-character');
+
 var supportedElements = ['link', 'atxHeading', 'strong', 'emphasis', 'deletion', 'code', 'setextHeading', 'fencedCode', 'reference'];
 var blockElements = ['atxHeading', 'setextHeading'];
 var particularElements = ['fencedCode'];
@@ -89,6 +91,63 @@ function tokenizeGenerator(prefix, oldParser, config) {
       }
 
       eaten = eat(prefix + parsedAttr.eaten)(eaten);
+    }
+
+    return eaten;
+  } // Return the new tokenizer function
+
+
+  return token;
+}
+
+function tokenizeModifierGenerator(oldParser, config) {
+  function token(eat, value, silent) {
+    // This we call the old tokenize
+    var self = this;
+    var eaten = oldParser.call(self, eat, value, silent);
+    var index = 0;
+
+    if (!eaten || !eaten.position || !eaten.children || eaten.children.length <= 0) {
+      return eaten;
+    }
+
+    var type = convTypeTag[eaten.type];
+    var lastChild = eaten.children[eaten.children.length - 1];
+
+    if (!lastChild.value || lastChild.value.length <= 0 || lastChild.value[lastChild.value.length - 1] !== '}') {
+      return eaten;
+    }
+
+    index = lastChild.value.lastIndexOf('{');
+    var parsedAttr = parseAttr(lastChild.value, index, config.mdAttrConfig);
+
+    if (parsedAttr.eaten.length !== lastChild.value.length - index) {
+      return eaten;
+    }
+
+    index -= 1;
+
+    while (index >= 0 && isWhiteSpace(lastChild.value[index])) {
+      index -= 1;
+    } // If parsed configure the node
+
+
+    if (parsedAttr) {
+      if (config.scope && config.scope !== 'none') {
+        var filtredProp = filterAttributes(parsedAttr.prop, config, type);
+
+        if (filtredProp !== {}) {
+          if (eaten.data) {
+            eaten.data.hProperties = filtredProp;
+          } else {
+            eaten.data = {
+              hProperties: filtredProp
+            };
+          }
+        }
+      }
+
+      lastChild.value = lastChild.value.slice(0, index + 1);
     }
 
     return eaten;
@@ -240,7 +299,7 @@ function tokenizeFencedCode(oldParser, config) {
 
         if (filtredProp !== {}) {
           if (eaten.data) {
-            eaten.data.hProperties = _objectSpread({}, eaten.data.hProperties, {}, filtredProp);
+            eaten.data.hProperties = _objectSpread(_objectSpread({}, eaten.data.hProperties), filtredProp);
           } else {
             eaten.data = {
               hProperties: filtredProp
@@ -273,10 +332,12 @@ function remarkAttr(userConfig) {
     elements: supportedElements,
     extend: {},
     scope: 'extended',
-    mdAttrConfig: undefined
+    mdAttrConfig: undefined,
+    enableAtxHeaderInline: true,
+    disableBlockElements: false
   };
 
-  var config = _objectSpread({}, defaultConfig, {}, userConfig);
+  var config = _objectSpread(_objectSpread({}, defaultConfig), userConfig);
 
   if (!isRemarkParser(parser)) {
     throw new Error('Missing parser to attach `remark-attr` [link] (to)');
@@ -287,7 +348,7 @@ function remarkAttr(userConfig) {
 
   config.elements.forEach(function (elem) {
     if (supportedElements.indexOf(elem) >= 0) {
-      if (blockElements.indexOf(elem) >= 0) {
+      if (!config.disableBlockElements && blockElements.indexOf(elem) >= 0) {
         var oldElem = tokenizersBlock[elem];
         tokenizersBlock[elem] = tokenizeGenerator('\n', oldElem, config);
       } else if (particularElements.indexOf(elem) >= 0) {
@@ -298,6 +359,11 @@ function remarkAttr(userConfig) {
         var elemTokenize = tokenizeGenerator('', _oldElem2, config);
         elemTokenize.locator = tokenizers[elem].locator;
         tokenizers[elem] = elemTokenize;
+      }
+
+      if (config.enableAtxHeaderInline && elem === 'atxHeading') {
+        var _oldElem3 = tokenizersBlock[elem];
+        tokenizersBlock[elem] = tokenizeModifierGenerator(_oldElem3, config);
       }
     }
   });

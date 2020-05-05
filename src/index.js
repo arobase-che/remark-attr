@@ -299,6 +299,8 @@ function remarkAttr(userConfig) {
     extend: {},
     scope: 'extended',
     mdAttrConfig: undefined,
+    enableAtxHeaderInline: true,
+    disableBlockElements: false,
   };
   const config = {...defaultConfig, ...userConfig};
 
@@ -312,7 +314,7 @@ function remarkAttr(userConfig) {
   // For each elements, replace the old tokenizer by the new one
   config.elements.forEach(elem => {
     if (supportedElements.indexOf(elem) >= 0) {
-      if (blockElements.indexOf(elem) >= 0) {
+      if (!config.disableBlockElements && blockElements.indexOf(elem) >= 0) {
         const oldElem = tokenizersBlock[elem];
         tokenizersBlock[elem] = tokenizeGenerator('\n', oldElem, config);
       } else if (particularElements.indexOf(elem) >= 0) {
@@ -323,6 +325,11 @@ function remarkAttr(userConfig) {
         const elemTokenize = tokenizeGenerator('', oldElem, config);
         elemTokenize.locator = tokenizers[elem].locator;
         tokenizers[elem] = elemTokenize;
+      }
+
+      if (config.enableAtxHeaderInline && elem === 'atxHeading') {
+        const oldElem = tokenizersBlock[elem];
+        tokenizersBlock[elem] = tokenizeModifierGenerator(oldElem, config);
       }
     }
   });
