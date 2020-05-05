@@ -129,33 +129,52 @@ test('link', t => {
 });
 
 test('header', t => {
-  const imageMd = `
+  const headerMd= `
 Title of the article
 ====================
 {data-id="title"}
 
 `;
-  const {contents} = renderDefault(imageMd);
+  const {contents} = renderDefault(headerMd);
   t.deepEqual(parse(contents), parse('<h1 data-id="title">Title of the article</h1>'));
 });
 
 test('atx header', t => {
-  const imageMd = `
+  const atxHeaderMd = `
 # Title of the article
 {data-id="title"}
 
 `;
-  const {contents} = renderDefault(imageMd);
+  const {contents} = renderDefault(atxHeaderMd);
   t.deepEqual(parse(contents), parse('<h1 data-id="title">Title of the article</h1>'));
 });
 
 test('atx header inline', t => {
-  const imageMd = `
-# Title of the article {data-id="title"}
+  const atxHeaderMd = `
+# Title of the article {data-id="title"}   
 
 `;
-  const {contents} = renderDefault(imageMd);
+  const {contents} = renderDefault(atxHeaderMd);
   t.deepEqual(parse(contents), parse('<h1 data-id="title">Title of the article</h1>'));
+});
+
+test('atx header inline 2', t => {
+  const atxHeaderMd = `
+# Title of the article{data-id="title"}
+
+`;
+  const {contents} = renderDefault(atxHeaderMd);
+  t.deepEqual(parse(contents), parse('<h1 data-id="title">Title of the article</h1>'));
+});
+
+test('header error inline', t => {
+  const atxHeaderMd = `
+Title of the article {data-id="title"}
+======================================
+
+`;
+  const {contents} = renderDefault(atxHeaderMd);
+  t.deepEqual(parse(contents), parse('<h1>Title of the article {data-id="title"}</h1>'));
 });
 
 test('emphasis and strong', t => {
