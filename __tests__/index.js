@@ -177,6 +177,33 @@ Title of the article {data-id="title"}
   t.deepEqual(parse(contents), parse('<h1>Title of the article {data-id="title"}</h1>'));
 });
 
+test('not atx header inline', t => {
+  const atxHeaderMd = `
+# {data-id="title"}
+
+`;
+  const {contents} = renderDefault(atxHeaderMd);
+  t.deepEqual(parse(contents), parse('<h1>{data-id="title"}</h1>'));
+});
+
+test('not atx header inline 2', t => {
+  const atxHeaderMd = `
+# Header {data-id="title"
+
+`;
+  const {contents} = renderDefault(atxHeaderMd);
+  t.deepEqual(parse(contents), parse('<h1>Header {data-id="title"</h1>'));
+});
+
+test('not atx header inline 3', t => {
+  const atxHeaderMd = `
+# Header data-id="title"}
+
+`;
+  const {contents} = renderDefault(atxHeaderMd);
+  t.deepEqual(parse(contents), parse('<h1>Header data-id="title"}</h1>'));
+});
+
 test('emphasis and strong', t => {
   const emphasis = 'Hey ! *That looks cool*{style="color: blue;"} ! No, that\'s **not**{.not} !';
   const {contents} = renderDefault(emphasis);
