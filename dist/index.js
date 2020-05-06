@@ -119,6 +119,11 @@ function tokenizeModifierGenerator(oldParser, config) {
     }
 
     index = lastChild.value.lastIndexOf('{');
+
+    if (index <= 0) {
+      return eaten;
+    }
+
     var parsedAttr = parseAttr(lastChild.value, index, config.mdAttrConfig);
 
     if (parsedAttr.eaten.length !== lastChild.value.length - index) {
@@ -129,6 +134,10 @@ function tokenizeModifierGenerator(oldParser, config) {
 
     while (index >= 0 && isWhiteSpace(lastChild.value[index])) {
       index -= 1;
+    }
+
+    if (index < 0) {
+      return eaten;
     } // If parsed configure the node
 
 
