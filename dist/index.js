@@ -12,9 +12,9 @@ var htmlElemAttr = require('html-element-attributes');
 
 var isWhiteSpace = require('is-whitespace-character');
 
-var supportedElements = ['link', 'atxHeading', 'strong', 'emphasis', 'deletion', 'code', 'setextHeading', 'fencedCode', 'reference'];
-var blockElements = ['atxHeading', 'setextHeading'];
-var particularElements = ['fencedCode'];
+var supportedElements = new Set(['link', 'atxHeading', 'strong', 'emphasis', 'deletion', 'code', 'setextHeading', 'fencedCode', 'reference', 'footnoteCall']);
+var blockElements = new Set(['atxHeading', 'setextHeading']);
+var particularElements = new Set(['fencedCode']);
 var particularTokenize = {};
 
 var DOMEventHandler = require('./dom-event-handler.js');
@@ -189,18 +189,18 @@ function filterAttributes(prop, config, type) {
   });
 
   var isDangerous = function isDangerous(p) {
-    return DOMEventHandler.indexOf(p) >= 0;
+    return DOMEventHandler.includes(p);
   };
 
   var isSpecific = function isSpecific(p) {
-    return type in specific && specific[type].indexOf(p) >= 0;
+    return type in specific && specific[type].includes(p);
   };
 
   var isGlobal = function isGlobal(p) {
-    return htmlElemAttr['*'].indexOf(p) >= 0 || p.match(/^aria-[a-z][a-z.-_0-9]*$/) || p.match(/^data-[a-z][a-z_.-0-9]*$/);
+    return htmlElemAttr['*'].includes(p) || p.match(/^aria-[a-z][a-z.-_\d]*$/) || p.match(/^data-[a-z][a-z_.-0-9]*$/);
   };
 
-  var inScope = function inScope(_) {
+  var inScope = function inScope() {
     return false;
   }; // Function used to `or combine` two other function.
 
@@ -220,7 +220,7 @@ function filterAttributes(prop, config, type) {
     case 'permissive':
     case 'every':
       if (allowDangerousDOMEventHandlers) {
-        inScope = function inScope(_) {
+        inScope = function inScope() {
           return true;
         };
       } else {
@@ -234,11 +234,11 @@ function filterAttributes(prop, config, type) {
     case 'extended':
     default:
       inScope = function inScope(p) {
-        return extendTag && type in extendTag && extendTag[type].indexOf(p) >= 0;
+        return extendTag && type in extendTag && extendTag[type].includes(p);
       };
 
       inScope = orFunc(inScope, function (p) {
-        return '*' in extendTag && extendTag['*'].indexOf(p) >= 0;
+        return '*' in extendTag && extendTag['*'].includes(p);
       });
     // Or if it in the specific scope, fallthrough
 
@@ -355,24 +355,24 @@ function remarkAttr(userConfig) {
   var tokenizers = parser.prototype.inlineTokenizers;
   var tokenizersBlock = parser.prototype.blockTokenizers; // For each elements, replace the old tokenizer by the new one
 
-  config.elements.forEach(function (elem) {
-    if (supportedElements.indexOf(elem) >= 0) {
-      if (!config.disableBlockElements && blockElements.indexOf(elem) >= 0) {
-        var oldElem = tokenizersBlock[elem];
-        tokenizersBlock[elem] = tokenizeGenerator('\n', oldElem, config);
-      } else if (particularElements.indexOf(elem) >= 0) {
-        var _oldElem = tokenizersBlock[elem];
-        tokenizersBlock[elem] = particularTokenize[elem](_oldElem, config);
+  config.elements.forEach(function (element) {
+    if ((element in tokenizersBlock || element in tokenizers) && supportedElements.has(element)) {
+      if (!config.disableBlockElements && blockElements.has(element)) {
+        var oldElement = tokenizersBlock[element];
+        tokenizersBlock[element] = tokenizeGenerator('\n', oldElement, config);
+      } else if (particularElements.has(element)) {
+        var _oldElement = tokenizersBlock[element];
+        tokenizersBlock[element] = particularTokenize[element](_oldElement, config);
       } else {
-        var _oldElem2 = tokenizers[elem];
-        var elemTokenize = tokenizeGenerator('', _oldElem2, config);
-        elemTokenize.locator = tokenizers[elem].locator;
-        tokenizers[elem] = elemTokenize;
+        var _oldElement2 = tokenizers[element];
+        var elementTokenize = tokenizeGenerator('', _oldElement2, config);
+        elementTokenize.locator = tokenizers[element].locator;
+        tokenizers[element] = elementTokenize;
       }
 
-      if (config.enableAtxHeaderInline && elem === 'atxHeading') {
-        var _oldElem3 = tokenizersBlock[elem];
-        tokenizersBlock[elem] = tokenizeModifierGenerator(_oldElem3, config);
+      if (config.enableAtxHeaderInline && element === 'atxHeading') {
+        var _oldElement3 = tokenizersBlock[element];
+        tokenizersBlock[element] = tokenizeModifierGenerator(_oldElement3, config);
       }
     }
   });

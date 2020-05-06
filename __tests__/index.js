@@ -1,15 +1,16 @@
 'use strict';
 
-import {join} from 'path';
-import {readFileSync as file} from 'fs';
-import test from 'ava';
-import raw from 'rehype-raw';
-import reParse from 'remark-parse';
-import stringify from 'rehype-stringify';
-import remark2rehype from 'remark-rehype';
-import unified from 'unified';
-import parse5 from 'parse5';
-import plugin from '..';
+const {join} = require('path');
+const file = require('fs').readFileSync;
+const test = require('ava');
+const raw = require('rehype-raw');
+const reParse = require('remark-parse');
+const reFootnt = require('remark-footnotes');
+const stringify = require('rehype-stringify');
+const remark2rehype = require('remark-rehype');
+const unified = require('unified');
+const parse5 = require('parse5');
+const plugin = require('..');
 
 const renderDefault = text => unified()
   .use(reParse)
@@ -26,7 +27,8 @@ const render = text => unified()
   .processSync(text);
 
 const renderFootnotes = text => unified()
-  .use(reParse, {footnotes: true})
+  .use(reParse)
+  .use(reFootnt, {inlineNotes: true})
   .use(plugin, {allowDangerousDOMEventHandlers: false, scope: 'permissive'})
   .use(remark2rehype)
   .use(stringify)
@@ -35,7 +37,7 @@ const renderFootnotes = text => unified()
 const renderRaw = text => unified()
   .use(reParse)
   .use(plugin, {allowDangerousDOMEventHandlers: false, scope: 'permissive'})
-  .use(remark2rehype, {allowDangerousHTML: true})
+  .use(remark2rehype, {allowDangerousHtml: true})
   .use(raw)
   .use(stringify)
   .processSync(text);
@@ -220,7 +222,7 @@ test('linkReference', t => {
 });
 
 test('footnote', t => {
-  const footnotes = `Since XP is good we should always use XP[^xp]{ data-id=xp }
+  const footnotes = `Since XP is good we should always use XP[^xp]{data-id=xp}
 
 [^xp]: Apply XP principe to XP.
 `;
