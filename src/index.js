@@ -4,7 +4,7 @@ const parseAttr = require('md-attr-parser');
 const htmlElemAttr = require('html-element-attributes');
 const isWhiteSpace = require('is-whitespace-character');
 
-const supportedElements = new Set(['link', 'atxHeading', 'strong', 'emphasis', 'deletion', 'code', 'setextHeading', 'fencedCode', 'reference', 'footnoteCall']);
+const supportedElements = new Set(['link', 'atxHeading', 'strong', 'emphasis', 'deletion', 'code', 'setextHeading', 'fencedCode', 'reference', 'footnoteCall', 'autoLink']);
 const blockElements = new Set(['atxHeading', 'setextHeading']);
 const particularElements = new Set(['fencedCode']);
 

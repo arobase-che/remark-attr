@@ -12,7 +12,7 @@ var htmlElemAttr = require('html-element-attributes');
 
 var isWhiteSpace = require('is-whitespace-character');
 
-var supportedElements = new Set(['link', 'atxHeading', 'strong', 'emphasis', 'deletion', 'code', 'setextHeading', 'fencedCode', 'reference', 'footnoteCall']);
+var supportedElements = new Set(['link', 'atxHeading', 'strong', 'emphasis', 'deletion', 'code', 'setextHeading', 'fencedCode', 'reference', 'footnoteCall', 'autoLink']);
 var blockElements = new Set(['atxHeading', 'setextHeading']);
 var particularElements = new Set(['fencedCode']);
 var particularTokenize = {};

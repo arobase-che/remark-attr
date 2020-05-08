@@ -125,9 +125,15 @@ test('image', t => {
 });
 
 test('link', t => {
-  const linkMd = 'This is a link :[Test link](ache.one){ ping="http://ache.one/big.brother"}';
+  const linkMd = 'This is a link :[Test link](ache.one){ ping="https://ache.one/big.brother"}';
   const {contents} = render(linkMd);
-  t.deepEqual(parse(contents), parse('<p>This is a link :<a href="ache.one" ping="http://ache.one/big.brother">Test link</a></p>'));
+  t.deepEqual(parse(contents), parse('<p>This is a link :<a href="ache.one" ping="https://ache.one/big.brother">Test link</a></p>'));
+});
+
+test('autolink', t => {
+  const linkMd = 'This is a link :<https://ache.one>{ ping="https://ache.one/big.brother"}';
+  const {contents} = render(linkMd);
+  t.deepEqual(parse(contents), parse('<p>This is a link :<a href="https://ache.one" ping="https://ache.one/big.brother">https://ache.one</a></p>'));
 });
 
 test('header', t => {
