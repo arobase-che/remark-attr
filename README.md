@@ -1,30 +1,36 @@
 # remark-attr
 
-This plugin adds support of custom attributes to Markdown syntax.
+This plugin adds support for custom attributes to Markdown syntax.
 
 For **security reasons**, this plugin uses [html-element-attributes](https://github.com/wooorm/html-element-attributes).
-The use of JavaScript attributes (onload for example) is not allowed by default.
+The use of JavaScript attributes (`onload` for example) is not allowed by default.
 
 
 ## Default Syntax
 
 Images :
-markdown
+
+~~~markdown
 ![alt](img){attrs} / ![alt](img){ height=50 }
+~~~
 
 
 Links :
-markdown
+~~~markdown
 [rms with a computer](https://rms.sexy){rel="external"}
+~~~
 
 
 Autolink :
-markdown
+
+~~~markdown
 Email me at : <mailto:falseEmail@example.org>
+~~~
 
 
 Header (Atx) :
-markdown
+
+~~~markdown
 ### This is a title
 {style="color:red;"}
 
@@ -33,80 +39,90 @@ or
 ### This is a title {style="color:yellow;"}
 
 If option enableAtxHeaderInline is set to `true` (default value).
+~~~
 
 
 Header :
-markdown
+~~~markdown
 This is a title
 ---------------
 {style="color: pink;"}
-
-
+~~~
 
 Emphasis :
-markdown
+
+~~~markdown
 Npm stand for *node*{style="color:red"} packet manager.
+~~~
 
 
 Strong :
-markdown
-This is a **Unicorn**{awesome} !
 
+~~~markdown
+This is a **Unicorn**{awesome} !
+~~~
 
 Delete :
-markdown
+
+~~~markdown
 Your problem is ~~at line 18~~{style="color: grey"}. My mistake, it's at line 14.
 
 
 Code :
-markdown
+
+~~~markdown
 You can use the `fprintf`{language=c} function to format the output to a file.
+~~~
 
 
 Footnote (using [remark-footnotes](https://github.com/remarkjs/remark-footnotes)) :
-markdown
+
+~~~markdown
 This is a footnote[^ref]{style="opacity: 0.8;"}
 
 
 [^ref]: And the reference.
+~~~
 
 
 ## rehype
 
 At the moment it aims is to be used with [rehype][rehype] only, using remark-rehype.
 
-md
+~~~md
 [rms with a computer](https://rms.sexy){rel=external}
-
+~~~
 
 produces:
 
-html
+~~~html
 <a href="https://rms.sexy" rel="external">rms with a computer</a>
+~~~
 
 
 ## Installation
 
 [npm][npm]:
 
-bash
+~~~bash
 npm install remark-attr
+~~~
 
 
 ## Dependencies:
 
-javascript
+~~~javascript
 const unified = require('unified')
 const remarkParse = require('remark-parse')
 const stringify = require('rehype-stringify')
 const remark2rehype = require('remark-rehype')
 const remarkAttr = require('remark-attr')
-
+~~~
 
 
 ## Usage:
 
-javascript
+~~~javascript
 const testFile = `
 
 Here a test :
@@ -123,14 +139,16 @@ unified()
   .process( testFile, (err, file) => {
     console.log(String(file))
   } )
+~~~
 
 
 Output :
 
-shell
+~~~shell
 $ node index.js
 <p>Here a test :</p>
 <p><img src="https://ache.one/res/ache.svg" alt="ache avatar" height="100"></p>
+~~~
 
 
 ## API
@@ -164,11 +182,7 @@ If you are confident enough you can add the name of a tokenizer that isn't offic
 
 An object that extends the list of attributes supported for some elements.
 
-Example :
-
-
-extend: {heading: ['original', 'quality', 'format', 'toc']}
-
+Example : `extend: {heading: ['original', 'quality', 'format', 'toc']}`
 
 With this configuration, if the scope permits it, 4 mores attributes will be supported for atxHeading elements.
 
