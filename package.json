@@ -15,10 +15,10 @@
     "plugin"
   ],
   "dependencies": {
-    "html-element-attributes": "^2.0.0",
-    "is-whitespace-character": "^1.0.4",
-    "md-attr-parser": "^1.3.0",
-    "remark-footnotes": "^1.0.0"
+    "html-element-attributes": "2.x.x",
+    "is-whitespace-character": "1.x.x",
+    "md-attr-parser": "1.x.x",
+    "remark-footnotes": "1.x.x"
   },
   "author": "ache <ache@ache.one>",
   "license": "MIT",
@@ -27,21 +27,21 @@
   },
   "homepage": "https://github.com/arobase-che/remark-attr#readme",
   "devDependencies": {
-    "@babel/cli": "7.x",
-    "@babel/core": "7.x",
-    "@babel/plugin-proposal-object-rest-spread": "7.x",
-    "@babel/preset-env": "7.x",
-    "ava": "3.x",
+    "@babel/cli": "7.x.x",
+    "@babel/core": "7.x.x",
+    "@babel/plugin-proposal-object-rest-spread": "7.x.x",
+    "@babel/preset-env": "7.x.x",
+    "ava": "3.x.x",
     "cross-env": "7.x",
-    "del-cli": "x",
+    "del-cli": "3.x.x",
     "parse5": "6.x",
     "rehype-raw": "4.x",
-    "rehype-stringify": "7.x",
-    "remark-parse": "8.x",
-    "remark-rehype": "6.x",
-    "tap-nyan": "1.1.0",
+    "rehype-stringify": "8.x",
+    "remark-parse": "8.x.x",
+    "remark-rehype": "7.x",
+    "tap-nyan": "1.x.x",
     "unified": "9.x",
-    "xo": "0.30.x"
+    "xo": "0.32.x"
   },
   "xo": {
     "space": true,
