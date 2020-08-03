@@ -174,7 +174,7 @@ If allowed, DOM event handlers will be added to the **global scope**.
 
 ###### `options.elements`
 
-The list of elements witch the attributes should be parsed.
+The list of elements which the attributes should be parsed.
 It's a list of string, a sub-list of `SUPPORTED_ELEMENTS`.
 If you are confident enough you can add the name of a tokenizer that isn't officialy supported but remember that it will not have been tested.
 
